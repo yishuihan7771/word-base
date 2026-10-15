@@ -1,0 +1,8 @@
+# 本地备份与个人数据，不进公开仓库
+words.before-merge.json
+exam-progress.json
+
+# Python / 临时文件
+__pycache__/
+*.pyc
+.tmp-*
