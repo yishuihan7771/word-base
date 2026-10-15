@@ -1,11 +1,11 @@
 {
-  "version": "2026.10.15.5",
+  "version": "2026.10.15.6",
   "updated": "2026-10-15",
   "note": "考公逻辑填空高频词语库。字段对应功能一：def/key=意思和要点，pos=词性，tone=褒贬意，modifies=用来修饰什么，subject=主语应该是谁。",
   "words": [
     {
       "w": "一蹴而就",
-      "abbr": "ycje",
+      "abbr": "ycej",
       "py": "yī cù ér jiù",
       "def": "蹴：踏；就：成功。踏一步就成功。形容事情轻而易举，一下子就能完成。",
       "key": "强调“过程极短、见效极快”，与“需要长期积累”对立。多用于否定句（不可能一蹴而就）。",
@@ -57,7 +57,7 @@
     },
     {
       "w": "耳濡目染",
-      "abbr": "errm",
+      "abbr": "ermr",
       "py": "ěr rú mù rǎn",
       "def": "濡：沾湿；染：沾染。耳朵经常听到，眼睛经常看到，不知不觉地受到影响。",
       "key": "与“潜移默化”的区别：耳濡目染的主语是“受影响的人”，强调亲历亲见；潜移默化强调影响的过程本身。",
@@ -89,7 +89,7 @@
     },
     {
       "w": "惟妙惟肖",
-      "abbr": "wwxx",
+      "abbr": "wmwx",
       "py": "wéi miào wéi xiào",
       "def": "形容描写或模仿得非常逼真、传神。",
       "key": "强调“模仿、描写得像”，对象可以是表演、模仿、描写；与“栩栩如生”的区别在于侧重“像不像”而非“活不活”。",
@@ -140,7 +140,7 @@
     },
     {
       "w": "首当其冲",
-      "abbr": "sqdc",
+      "abbr": "sdqc",
       "py": "shǒu dāng qí chōng",
       "def": "当：承当，承受；冲：要冲，交通要道。比喻最先受到攻击或遭遇灾难。",
       "key": "含“受害”义。最常见的误用是当成“首先、冲在最前面（褒义）”。",
@@ -216,7 +216,9 @@
       "source": "2025年河北省公务员录用考试《行测》题（网友回忆版） 第57题",
       "seen": 2,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bù yán ér yù",
+      "abbr": "byey"
     },
     {
       "w": "丰富",
@@ -230,7 +232,9 @@
       "source": "2026年广东省公务员录用考试《行测》题（网友回忆版） 第20题",
       "seen": 2,
       "hit": 2,
-      "src": "exam"
+      "src": "exam",
+      "py": "fēng fù",
+      "abbr": "ff"
     },
     {
       "w": "关键",
@@ -244,7 +248,9 @@
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第31题",
       "seen": 2,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "guān jiàn",
+      "abbr": "gj"
     },
     {
       "w": "升华",
@@ -257,7 +263,9 @@
       ],
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第27题",
       "seen": 2,
-      "src": "exam"
+      "src": "exam",
+      "py": "shēng huá",
+      "abbr": "sh"
     },
     {
       "w": "司空见惯",
@@ -271,7 +279,9 @@
       "source": "2019年青海省公务员录用考试《行测》题省市州级（A类）（网友回忆版） 第28题",
       "seen": 2,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "sī kōng jiàn guàn",
+      "abbr": "skjg"
     },
     {
       "w": "复杂",
@@ -284,7 +294,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第23题",
       "seen": 2,
-      "src": "exam"
+      "src": "exam",
+      "py": "fù zá",
+      "abbr": "fz"
     },
     {
       "w": "妙趣横生",
@@ -314,7 +326,9 @@
       ],
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第34题",
       "seen": 2,
-      "src": "exam"
+      "src": "exam",
+      "py": "jìn shàn jìn měi",
+      "abbr": "jsjm"
     },
     {
       "w": "层见叠出",
@@ -327,7 +341,9 @@
       ],
       "source": "2019年青海省公务员录用考试《行测》题省市州级（A类）（网友回忆版） 第28题",
       "seen": 2,
-      "src": "exam"
+      "src": "exam",
+      "py": "céng xiàn dié chū",
+      "abbr": "cxdc"
     },
     {
       "w": "推陈出新",
@@ -375,7 +391,9 @@
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 2,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yǒu xiàn",
+      "abbr": "yx"
     },
     {
       "w": "沸反盈天",
@@ -390,7 +408,9 @@
       "pending": true,
       "def": "形容人声喧嚣杂乱。沸反，像水一样翻腾",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%B2%B8%E5%8F%8D%E7%9B%88%E5%A4%A9"
+      "srcUrl": "https://www.zdic.net/hans/%E6%B2%B8%E5%8F%8D%E7%9B%88%E5%A4%A9",
+      "py": "fèi fǎn yíng tiān",
+      "abbr": "ffyt"
     },
     {
       "w": "沸沸扬扬",
@@ -422,7 +442,9 @@
       "source": "2025年湖南省公务员录用考试《行测》题（网友回忆版） 第26题",
       "seen": 2,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dòng xī",
+      "abbr": "dx"
     },
     {
       "w": "清晰",
@@ -436,7 +458,9 @@
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第31题",
       "seen": 2,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "qīng xī",
+      "abbr": "qx"
     },
     {
       "w": "独特",
@@ -449,7 +473,9 @@
       ],
       "source": "2019年河北省公务员录用考试《行测》题（县级+乡镇）（网友回忆版） 第38题",
       "seen": 2,
-      "src": "exam"
+      "src": "exam",
+      "py": "dú tè",
+      "abbr": "dt"
     },
     {
       "w": "留存",
@@ -479,7 +505,9 @@
       ],
       "source": "2020年国家公务员录用考试《行测》题（地市级网友回忆版） 第27题",
       "seen": 2,
-      "src": "exam"
+      "src": "exam",
+      "py": "xiāng yìng chéng qù",
+      "abbr": "xycq"
     },
     {
       "w": "蔚然成风",
@@ -508,7 +536,9 @@
       ],
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第27题",
       "seen": 2,
-      "src": "exam"
+      "src": "exam",
+      "py": "zhuī qiú",
+      "abbr": "zq"
     },
     {
       "w": "靡然成风",
@@ -538,7 +568,9 @@
       "source": "2025年云南省公务员录用考试《行测》题（网友回忆版） 第25题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yì hōng ér shàng",
+      "abbr": "yhes"
     },
     {
       "w": "一语中的",
@@ -550,7 +582,9 @@
       ],
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第28题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yī yǔ zhōng dì",
+      "abbr": "yyzd"
     },
     {
       "w": "一面之词",
@@ -563,7 +597,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yī miàn zhī cí",
+      "abbr": "ymzc"
     },
     {
       "w": "不容置疑",
@@ -575,7 +611,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第27题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bù róng zhì yí",
+      "abbr": "brzy"
     },
     {
       "w": "不经之谈",
@@ -605,7 +643,9 @@
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第28题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bù luò kē jiù",
+      "abbr": "blkj"
     },
     {
       "w": "个性",
@@ -645,7 +685,9 @@
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第27题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "jǔ yī fǎn sān",
+      "abbr": "jyfs"
     },
     {
       "w": "举重若轻",
@@ -656,7 +698,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第22题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "jǔ zhòng ruò qīng",
+      "abbr": "jzrq"
     },
     {
       "w": "买椟还珠",
@@ -668,7 +712,9 @@
       "source": "2020年海南公务员录用考试《行测》试题（网友回忆版） 第28题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "mǎi dú huán zhū",
+      "abbr": "mdhz"
     },
     {
       "w": "互为表里",
@@ -679,7 +725,9 @@
       ],
       "source": "2026年黑龙江公务员录用考试《行测》题（网友回忆版） 第32题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "hù wéi biǎo lǐ",
+      "abbr": "hwbl"
     },
     {
       "w": "五彩斑斓",
@@ -692,7 +740,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第27题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "wǔ cǎi bān lán",
+      "abbr": "wcbl"
     },
     {
       "w": "亦庄亦谐",
@@ -705,7 +755,9 @@
       "source": "2020年国家公务员录用考试《行测》题（地市级网友回忆版） 第27题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yì zhuāng yì xié",
+      "abbr": "yzyx"
     },
     {
       "w": "人云亦云",
@@ -732,7 +784,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dài biǎo",
+      "abbr": "db"
     },
     {
       "w": "令人神往",
@@ -744,7 +798,9 @@
       ],
       "source": "2019年河北省公务员录用考试《行测》题（县级+乡镇）（网友回忆版） 第38题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "lìng rén shén wǎng",
+      "abbr": "lrsw"
     },
     {
       "w": "众望所归",
@@ -756,7 +812,9 @@
       ],
       "source": "2020年四川省公务员考试《行测》试题（网友回忆版） 第20题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zhòng wàng suǒ guī",
+      "abbr": "zwsg"
     },
     {
       "w": "优势",
@@ -788,7 +846,9 @@
       "pending": true,
       "def": "实地考核；亲自考察",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E4%BD%93%E5%AF%9F"
+      "srcUrl": "https://www.zdic.net/hans/%E4%BD%93%E5%AF%9F",
+      "py": "tǐ chá",
+      "abbr": "tc"
     },
     {
       "w": "修补",
@@ -803,7 +863,9 @@
       "pending": true,
       "def": "修理与补充",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E4%BF%AE%E8%A1%A5"
+      "srcUrl": "https://www.zdic.net/hans/%E4%BF%AE%E8%A1%A5",
+      "py": "xiū bǔ",
+      "abbr": "xb"
     },
     {
       "w": "修饰",
@@ -815,7 +877,9 @@
       ],
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第27题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "xiū shì",
+      "abbr": "xs"
     },
     {
       "w": "倾听",
@@ -844,7 +908,9 @@
       "source": "2020年国家公务员录用考试《行测》题（地市级网友回忆版） 第27题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "ǒu rán xìng",
+      "abbr": "orx"
     },
     {
       "w": "共同性",
@@ -870,7 +936,9 @@
       "pending": true,
       "def": "可作为学习或仿效标准的人或事物",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%85%B8%E8%8C%83"
+      "srcUrl": "https://www.zdic.net/hans/%E5%85%B8%E8%8C%83",
+      "py": "diǎn fàn",
+      "abbr": "df"
     },
     {
       "w": "兼收并蓄",
@@ -902,7 +970,9 @@
       "pending": true,
       "def": "比喻珍贵稀少的人才或事物",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%87%A4%E6%AF%9B%E9%BA%9F%E8%A7%92"
+      "srcUrl": "https://www.zdic.net/hans/%E5%87%A4%E6%AF%9B%E9%BA%9F%E8%A7%92",
+      "py": "fèng máo lín jiǎo",
+      "abbr": "fmlj"
     },
     {
       "w": "凶险",
@@ -916,7 +986,9 @@
       "pending": true,
       "def": "危险可怕",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%87%B6%E9%99%A9"
+      "srcUrl": "https://www.zdic.net/hans/%E5%87%B6%E9%99%A9",
+      "py": "xiōng xiǎn",
+      "abbr": "xx"
     },
     {
       "w": "刚柔兼济",
@@ -955,7 +1027,9 @@
       ],
       "source": "2020年国家公务员录用考试《行测》题（地市级网友回忆版） 第27题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bié chū xīn cái",
+      "abbr": "bcxc"
     },
     {
       "w": "别出机杼",
@@ -983,7 +1057,9 @@
       ],
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第27题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "kè huà",
+      "abbr": "kh"
     },
     {
       "w": "刻舟求剑",
@@ -1026,7 +1102,9 @@
       ],
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第34题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "lì bù cóng xīn",
+      "abbr": "lbcx"
     },
     {
       "w": "力薄才疏",
@@ -1039,7 +1117,9 @@
       ],
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第34题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "lì bó cái shū",
+      "abbr": "lbcs"
     },
     {
       "w": "劣势",
@@ -1069,7 +1149,9 @@
       ],
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bāo guǒ",
+      "abbr": "bg"
     },
     {
       "w": "匠心独运",
@@ -1096,7 +1178,9 @@
       ],
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第27题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bó cǎi zhòng cháng",
+      "abbr": "bczc"
     },
     {
       "w": "危言耸听",
@@ -1107,7 +1191,9 @@
       ],
       "source": "2023年山东省公务员录用考试《行测》试题（网友回忆版） 第12题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "wēi yán sǒng tīng",
+      "abbr": "wyst"
     },
     {
       "w": "厚实",
@@ -1135,7 +1221,9 @@
       ],
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第34题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "hòu jī bó fā",
+      "abbr": "hjbf"
     },
     {
       "w": "厚重",
@@ -1148,7 +1236,9 @@
       "source": "2019年河北省公务员录用考试《行测》题（县级+乡镇）（网友回忆版） 第38题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "hòu zhòng",
+      "abbr": "hz"
     },
     {
       "w": "原则",
@@ -1177,7 +1267,9 @@
       "source": "2025年河北省公务员录用考试《行测》题（网友回忆版） 第58题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "lìng pì xī jìng",
+      "abbr": "lpxj"
     },
     {
       "w": "只言片语",
@@ -1191,7 +1283,9 @@
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zhī yán piàn yǔ",
+      "abbr": "zypy"
     },
     {
       "w": "同一性",
@@ -1203,7 +1297,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tóng yī xìng",
+      "abbr": "tyx"
     },
     {
       "w": "吐故纳新",
@@ -1217,7 +1313,9 @@
       "source": "2025年湖南省公务员录用考试《行测》题（网友回忆版） 第24题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tǔ gù nà xīn",
+      "abbr": "tgnx"
     },
     {
       "w": "呼之欲出",
@@ -1230,7 +1328,9 @@
       ],
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第28题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "hū zhī yù chū",
+      "abbr": "hzyc"
     },
     {
       "w": "和声细语",
@@ -1253,7 +1353,9 @@
       ],
       "source": "2020年江苏省公务员录用考试《行测》题（C类）（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zhǐ chǐ tiān yá",
+      "abbr": "zcty"
     },
     {
       "w": "哗众取宠",
@@ -1265,7 +1367,9 @@
       ],
       "source": "2025年辽宁省公务员录用考试《行测》题（网友回忆版） 第40题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "huá zhòng qǔ chǒng",
+      "abbr": "hzqc"
     },
     {
       "w": "回应",
@@ -1293,7 +1397,9 @@
       ],
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "gù jié",
+      "abbr": "gj"
     },
     {
       "w": "坦诚",
@@ -1307,7 +1413,9 @@
       "pending": true,
       "def": "坦白真诚",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%9D%A6%E8%AF%9A"
+      "srcUrl": "https://www.zdic.net/hans/%E5%9D%A6%E8%AF%9A",
+      "py": "tǎn chéng",
+      "abbr": "tc"
     },
     {
       "w": "增添",
@@ -1320,7 +1428,9 @@
       "source": "2022年青海省公务员录用考试《行测》题（网友回忆版） 第26题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zēng tiān",
+      "abbr": "zt"
     },
     {
       "w": "增补",
@@ -1334,7 +1444,9 @@
       "pending": true,
       "def": "增加补充",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%A2%9E%E8%A1%A5"
+      "srcUrl": "https://www.zdic.net/hans/%E5%A2%9E%E8%A1%A5",
+      "py": "zēng bǔ",
+      "abbr": "zb"
     },
     {
       "w": "增设",
@@ -1347,7 +1459,9 @@
       ],
       "source": "2022年青海省公务员录用考试《行测》题（网友回忆版） 第26题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zēng shè",
+      "abbr": "zs"
     },
     {
       "w": "增进",
@@ -1359,7 +1473,9 @@
       ],
       "source": "2022年青海省公务员录用考试《行测》题（网友回忆版） 第26题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zēng jìn",
+      "abbr": "zj"
     },
     {
       "w": "增量",
@@ -1370,7 +1486,9 @@
       ],
       "source": "2023年山东省公务员录用考试《行测》试题（网友回忆版） 第12题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zēng liàng",
+      "abbr": "zl"
     },
     {
       "w": "墨守成规",
@@ -1384,7 +1502,9 @@
       "pending": true,
       "def": "固守旧有规范而不求变通",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%A2%A8%E5%AE%88%E6%88%90%E8%A7%84"
+      "srcUrl": "https://www.zdic.net/hans/%E5%A2%A8%E5%AE%88%E6%88%90%E8%A7%84",
+      "py": "mò shǒu chéng guī",
+      "abbr": "mscg"
     },
     {
       "w": "声名鹊起",
@@ -1398,7 +1518,9 @@
       "pending": true,
       "def": "形容名声迅速提升",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%A3%B0%E5%90%8D%E9%B9%8A%E8%B5%B7"
+      "srcUrl": "https://www.zdic.net/hans/%E5%A3%B0%E5%90%8D%E9%B9%8A%E8%B5%B7",
+      "py": "shēng míng què qǐ",
+      "abbr": "smqq"
     },
     {
       "w": "大开大合",
@@ -1411,7 +1533,9 @@
       "pending": true,
       "def": "指面积、体积、容量、数量、强度、力量超…",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%A4%A7%E5%BC%80%E5%A4%A7%E5%90%88"
+      "srcUrl": "https://www.zdic.net/hans/%E5%A4%A7%E5%BC%80%E5%A4%A7%E5%90%88",
+      "py": "dà kāi dà hé",
+      "abbr": "dkdh"
     },
     {
       "w": "大海捞针",
@@ -1423,7 +1547,9 @@
       ],
       "source": "2020年四川省公务员考试《行测》试题（网友回忆版） 第20题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dà hǎi lāo zhēn",
+      "abbr": "dhlz"
     },
     {
       "w": "大起大落",
@@ -1435,7 +1561,9 @@
       "source": "2025年云南省公务员录用考试《行测》题（网友回忆版） 第25题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dà qǐ dà luò",
+      "abbr": "dqdl"
     },
     {
       "w": "天人合一",
@@ -1446,7 +1574,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第22题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tiān rén hé yī",
+      "abbr": "trhy"
     },
     {
       "w": "失误",
@@ -1493,7 +1623,9 @@
       "source": "2025年湖南省公务员录用考试《行测》题（网友回忆版） 第24题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "qì hé",
+      "abbr": "qh"
     },
     {
       "w": "存积",
@@ -1520,7 +1652,9 @@
       "source": "2023年山东省公务员录用考试《行测》试题（网友回忆版） 第12题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "cún liàng",
+      "abbr": "cl"
     },
     {
       "w": "孤芳自赏",
@@ -1532,7 +1666,9 @@
       "source": "2020年海南公务员录用考试《行测》试题（网友回忆版） 第28题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "gū fāng zì shǎng",
+      "abbr": "gfzs"
     },
     {
       "w": "宁静",
@@ -1565,7 +1701,7 @@
       "src": "汉典",
       "srcUrl": "https://www.zdic.net/hans/%E5%AE%89%E9%9D%99",
       "py": "ān jìng",
-      "abbr": "j"
+      "abbr": "aj"
     },
     {
       "w": "完整",
@@ -1577,7 +1713,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第31题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "wán zhěng",
+      "abbr": "wz"
     },
     {
       "w": "完美无缺",
@@ -1590,7 +1728,9 @@
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第34题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "wán měi wú quē",
+      "abbr": "wmwq"
     },
     {
       "w": "实实在在",
@@ -1603,7 +1743,9 @@
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第27题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "shí shí zài zài",
+      "abbr": "sszz"
     },
     {
       "w": "实际",
@@ -1633,7 +1775,9 @@
       "pending": true,
       "def": "心胸开阔，气量宏大",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%AE%BD%E5%B9%BF"
+      "srcUrl": "https://www.zdic.net/hans/%E5%AE%BD%E5%B9%BF",
+      "py": "kuān guǎng",
+      "abbr": "kg"
     },
     {
       "w": "宽阔",
@@ -1646,7 +1790,9 @@
       ],
       "source": "2026年广东省公务员录用考试《行测》题（网友回忆版） 第20题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "kuān kuò",
+      "abbr": "kk"
     },
     {
       "w": "密封",
@@ -1659,7 +1805,9 @@
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "mì fēng",
+      "abbr": "mf"
     },
     {
       "w": "尺度",
@@ -1672,7 +1820,9 @@
       "source": "2020年四川省公务员考试《行测》试题（网友回忆版） 第20题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "chǐ dù",
+      "abbr": "cd"
     },
     {
       "w": "尽收眼底",
@@ -1687,7 +1837,9 @@
       "pending": true,
       "def": "全部景物都能看见",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%B0%BD%E6%94%B6%E7%9C%BC%E5%BA%95"
+      "srcUrl": "https://www.zdic.net/hans/%E5%B0%BD%E6%94%B6%E7%9C%BC%E5%BA%95",
+      "py": "jìn shōu yǎn dǐ",
+      "abbr": "jsyd"
     },
     {
       "w": "屈指可数",
@@ -1701,7 +1853,9 @@
       "pending": true,
       "def": "用手指就能计算清楚。形容数量稀少",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%B1%88%E6%8C%87%E5%8F%AF%E6%95%B0"
+      "srcUrl": "https://www.zdic.net/hans/%E5%B1%88%E6%8C%87%E5%8F%AF%E6%95%B0",
+      "py": "qū zhǐ kě shǔ",
+      "abbr": "qzks"
     },
     {
       "w": "山清水秀",
@@ -1713,7 +1867,9 @@
       ],
       "source": "河南省2019年统一考试录用司法所公务员《行测》题（网友回忆版） 第4题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "shān qīng shuǐ xiù",
+      "abbr": "sqsx"
     },
     {
       "w": "山穷水尽",
@@ -1725,7 +1881,9 @@
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第21题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "shān qióng shuǐ jìn",
+      "abbr": "sqsj"
     },
     {
       "w": "崭露头角",
@@ -1738,7 +1896,9 @@
       ],
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第25题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zhǎn lù tóu jiǎo",
+      "abbr": "zltj"
     },
     {
       "w": "差池",
@@ -1751,7 +1911,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "chā chí",
+      "abbr": "cc"
     },
     {
       "w": "希望",
@@ -1794,7 +1956,9 @@
       ],
       "source": "2020年山东省公务员录用考试《行测》试题（网友回忆版） 第12题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bìng xíng bù bèi",
+      "abbr": "bxbb"
     },
     {
       "w": "延伸",
@@ -1806,7 +1970,9 @@
       ],
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第28题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yán shēn",
+      "abbr": "ys"
     },
     {
       "w": "引导",
@@ -1820,7 +1986,9 @@
       "pending": true,
       "def": "带领他人前行",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%BC%95%E5%AF%BC"
+      "srcUrl": "https://www.zdic.net/hans/%E5%BC%95%E5%AF%BC",
+      "py": "yǐn dǎo",
+      "abbr": "yd"
     },
     {
       "w": "弥合",
@@ -1834,7 +2002,9 @@
       "source": "2026年广东省公务员录用考试《行测》题（网友回忆版） 第20题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "mí hé",
+      "abbr": "mh"
     },
     {
       "w": "弱势",
@@ -1847,7 +2017,9 @@
       ],
       "source": "2026年河北省公务员录用考试《行测》题（网友回忆版） 第61题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "ruò shì",
+      "abbr": "rs"
     },
     {
       "w": "形式",
@@ -1878,7 +2050,9 @@
       "pending": true,
       "def": "影子和回声。形容感应迅速",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%BD%B1%E5%93%8D"
+      "srcUrl": "https://www.zdic.net/hans/%E5%BD%B1%E5%93%8D",
+      "py": "yǐng xiǎng",
+      "abbr": "yx"
     },
     {
       "w": "循规蹈矩",
@@ -1892,7 +2066,9 @@
       "pending": true,
       "def": "遵守既定的规范和准则",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E5%BE%AA%E8%A7%84%E8%B9%88%E7%9F%A9"
+      "srcUrl": "https://www.zdic.net/hans/%E5%BE%AA%E8%A7%84%E8%B9%88%E7%9F%A9",
+      "py": "xún guī dǎo jǔ",
+      "abbr": "xgdj"
     },
     {
       "w": "心声",
@@ -1904,7 +2080,9 @@
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第27题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "xīn shēng",
+      "abbr": "xs"
     },
     {
       "w": "忽视",
@@ -1918,7 +2096,9 @@
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第30题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "hū shì",
+      "abbr": "hs"
     },
     {
       "w": "态势",
@@ -1931,7 +2111,9 @@
       ],
       "source": "2026年河北省公务员录用考试《行测》题（网友回忆版） 第61题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tài shì",
+      "abbr": "ts"
     },
     {
       "w": "恐惧",
@@ -1943,7 +2125,9 @@
       ],
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "kǒng jù",
+      "abbr": "kj"
     },
     {
       "w": "恰到好处",
@@ -1957,7 +2141,9 @@
       "pending": true,
       "def": "言行举止正好达到最合适的程度",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%81%B0%E5%88%B0%E5%A5%BD%E5%A4%84"
+      "srcUrl": "https://www.zdic.net/hans/%E6%81%B0%E5%88%B0%E5%A5%BD%E5%A4%84",
+      "py": "qià dào hǎo chù",
+      "abbr": "qdhc"
     },
     {
       "w": "愿望",
@@ -1983,7 +2169,9 @@
       ],
       "source": "2023年山东省公务员录用考试《行测》试题（网友回忆版） 第12题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "pū shuò mí lí",
+      "abbr": "psml"
     },
     {
       "w": "打磨",
@@ -1995,7 +2183,9 @@
       ],
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第27题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dǎ mó",
+      "abbr": "dm"
     },
     {
       "w": "扩展",
@@ -2010,7 +2200,9 @@
       "pending": true,
       "def": "向外延伸扩大",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%89%A9%E5%B1%95"
+      "srcUrl": "https://www.zdic.net/hans/%E6%89%A9%E5%B1%95",
+      "py": "kuò zhǎn",
+      "abbr": "kz"
     },
     {
       "w": "投合",
@@ -2023,7 +2215,9 @@
       ],
       "source": "2025年湖南省公务员录用考试《行测》题（网友回忆版） 第24题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tóu hé",
+      "abbr": "th"
     },
     {
       "w": "抽象",
@@ -2054,7 +2248,9 @@
       "pending": true,
       "def": "以刑罚逼供审讯",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%8B%B7%E9%97%AE"
+      "srcUrl": "https://www.zdic.net/hans/%E6%8B%B7%E9%97%AE",
+      "py": "kǎo wèn",
+      "abbr": "kw"
     },
     {
       "w": "按部就班",
@@ -2067,7 +2263,9 @@
       "source": "2025年辽宁省公务员录用考试《行测》题（网友回忆版） 第40题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "àn bù jiù bān",
+      "abbr": "abjb"
     },
     {
       "w": "捉襟见肘",
@@ -2080,7 +2278,9 @@
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第34题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zhuō jīn jiàn zhǒu",
+      "abbr": "zjjz"
     },
     {
       "w": "捕捉",
@@ -2093,7 +2293,9 @@
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第28题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bǔ zhuō",
+      "abbr": "bz"
     },
     {
       "w": "推动",
@@ -2105,7 +2307,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第23题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tuī dòng",
+      "abbr": "td"
     },
     {
       "w": "推敲",
@@ -2118,7 +2322,9 @@
       ],
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第30题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tuī qiāo",
+      "abbr": "tq"
     },
     {
       "w": "掩耳盗铃",
@@ -2131,7 +2337,9 @@
       "pending": true,
       "def": "比喻自欺欺人的行为",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%8E%A9%E8%80%B3%E7%9B%97%E9%93%83"
+      "srcUrl": "https://www.zdic.net/hans/%E6%8E%A9%E8%80%B3%E7%9B%97%E9%93%83",
+      "py": "yǎn ěr dào líng",
+      "abbr": "yedl"
     },
     {
       "w": "摇曳生姿",
@@ -2154,7 +2362,9 @@
       ],
       "source": "2025年辽宁省公务员录用考试《行测》题（网友回忆版） 第40题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "gǎi xián gēng zhāng",
+      "abbr": "gxgz"
     },
     {
       "w": "故步自封",
@@ -2245,7 +2455,9 @@
       "pending": true,
       "def": "为达到某种目的所行的方式和步骤",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%96%B9%E6%B3%95"
+      "srcUrl": "https://www.zdic.net/hans/%E6%96%B9%E6%B3%95",
+      "py": "fāng fǎ",
+      "abbr": "ff"
     },
     {
       "w": "无可挑剔",
@@ -2281,7 +2493,9 @@
       "pending": true,
       "def": "完全消失，不留任何痕迹",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%97%A0%E5%BD%B1%E6%97%A0%E8%B8%AA"
+      "srcUrl": "https://www.zdic.net/hans/%E6%97%A0%E5%BD%B1%E6%97%A0%E8%B8%AA",
+      "py": "wú yǐng wú zōng",
+      "abbr": "wywz"
     },
     {
       "w": "无懈可击",
@@ -2310,7 +2524,9 @@
       "pending": true,
       "def": "没有目标地胡乱射箭。比喻言行缺乏明确目标或不看对象",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%97%A0%E7%9A%84%E6%94%BE%E7%9F%A2"
+      "srcUrl": "https://www.zdic.net/hans/%E6%97%A0%E7%9A%84%E6%94%BE%E7%9F%A2",
+      "py": "wú dì fàng shǐ",
+      "abbr": "wdfs"
     },
     {
       "w": "无视",
@@ -2356,7 +2572,9 @@
       ],
       "source": "2022年陕西省公务员录用考试《行测》题（网友回忆版） 第21题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "xīng luó qí bù",
+      "abbr": "xlqb"
     },
     {
       "w": "春风化雨",
@@ -2369,7 +2587,9 @@
       "source": "2019年河北省公务员录用考试《行测》题（县级+乡镇）（网友回忆版） 第38题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "chūn fēng huà yǔ",
+      "abbr": "cfhy"
     },
     {
       "w": "显而易见",
@@ -2381,7 +2601,9 @@
       ],
       "source": "2025年河北省公务员录用考试《行测》题（网友回忆版） 第57题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "xiǎn ér yì jiàn",
+      "abbr": "xeyj"
     },
     {
       "w": "晦涩",
@@ -2425,7 +2647,9 @@
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第23题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yǒu xiào",
+      "abbr": "yx"
     },
     {
       "w": "望眼欲穿",
@@ -2440,7 +2664,9 @@
       "pending": true,
       "def": "形容期盼亲人归来的迫切心情",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%9C%9B%E7%9C%BC%E6%AC%B2%E7%A9%BF"
+      "srcUrl": "https://www.zdic.net/hans/%E6%9C%9B%E7%9C%BC%E6%AC%B2%E7%A9%BF",
+      "py": "wàng yǎn yù chuān",
+      "abbr": "wyyc"
     },
     {
       "w": "望穿秋水",
@@ -2452,7 +2678,9 @@
       ],
       "source": "2019年河北省公务员录用考试《行测》题（县级+乡镇）（网友回忆版） 第38题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "wàng chuān qiū shuǐ",
+      "abbr": "wcqs"
     },
     {
       "w": "朝秦暮楚",
@@ -2465,7 +2693,9 @@
       "pending": true,
       "def": "时而倾向秦国，时而倾向楚国，比喻反复无常",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%9C%9D%E7%A7%A6%E6%9A%AE%E6%A5%9A"
+      "srcUrl": "https://www.zdic.net/hans/%E6%9C%9D%E7%A7%A6%E6%9A%AE%E6%A5%9A",
+      "py": "zhāo qín mù chǔ",
+      "abbr": "zqmc"
     },
     {
       "w": "本源",
@@ -2477,7 +2707,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第28题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "běn yuán",
+      "abbr": "by"
     },
     {
       "w": "朴实无华",
@@ -2491,7 +2723,9 @@
       "pending": true,
       "def": "质朴实在而不浮华",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%9C%B4%E5%AE%9E%E6%97%A0%E5%8D%8E"
+      "srcUrl": "https://www.zdic.net/hans/%E6%9C%B4%E5%AE%9E%E6%97%A0%E5%8D%8E",
+      "py": "pú shí wú huá",
+      "abbr": "pswh"
     },
     {
       "w": "条件",
@@ -2520,7 +2754,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "sōng xiè",
+      "abbr": "sx"
     },
     {
       "w": "标准",
@@ -2534,7 +2770,9 @@
       "pending": true,
       "def": "衡量事物的准则",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%A0%87%E5%87%86"
+      "srcUrl": "https://www.zdic.net/hans/%E6%A0%87%E5%87%86",
+      "py": "biāo zhǔn",
+      "abbr": "bz"
     },
     {
       "w": "标新立异",
@@ -2547,7 +2785,9 @@
       "source": "2025年辽宁省公务员录用考试《行测》题（网友回忆版） 第40题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "biāo xīn lì yì",
+      "abbr": "bxly"
     },
     {
       "w": "校准",
@@ -2559,7 +2799,9 @@
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第27题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "jiào zhǔn",
+      "abbr": "jz"
     },
     {
       "w": "格局",
@@ -2589,7 +2831,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第28题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "guì guān",
+      "abbr": "gg"
     },
     {
       "w": "检验",
@@ -2603,7 +2847,9 @@
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第30题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "jiǎn yàn",
+      "abbr": "jy"
     },
     {
       "w": "模式",
@@ -2616,7 +2862,9 @@
       ],
       "source": "2025年湖南省公务员录用考试《行测》题（网友回忆版） 第26题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "mó shì",
+      "abbr": "ms"
     },
     {
       "w": "模糊",
@@ -2676,7 +2924,9 @@
       "pending": true,
       "def": "原义是指洪水猛然上涌的样子，现在则常用来形容人群的活动声势浩大，不可阻挡",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%B1%B9%E6%B6%8C%E6%BE%8E%E6%B9%83"
+      "srcUrl": "https://www.zdic.net/hans/%E6%B1%B9%E6%B6%8C%E6%BE%8E%E6%B9%83",
+      "py": "xiōng yǒng péng pài",
+      "abbr": "xypp"
     },
     {
       "w": "波澜壮阔",
@@ -2690,7 +2940,9 @@
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第27题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bō lán zhuàng kuò",
+      "abbr": "blzk"
     },
     {
       "w": "流光溢彩",
@@ -2704,7 +2956,9 @@
       "pending": true,
       "def": "流光：流动、闪烁的光彩，溢彩：色彩象要溢出来。多用于形容车灯、霓虹等，有时候也用来形容时装表演和珠宝",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%B5%81%E5%85%89%E6%BA%A2%E5%BD%A9"
+      "srcUrl": "https://www.zdic.net/hans/%E6%B5%81%E5%85%89%E6%BA%A2%E5%BD%A9",
+      "py": "liú guāng yì cǎi",
+      "abbr": "lgyc"
     },
     {
       "w": "流言蜚语",
@@ -2719,7 +2973,9 @@
       "pending": true,
       "def": "没有根据的议论或诬蔑的话",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%B5%81%E8%A8%80%E8%9C%9A%E8%AF%AD"
+      "srcUrl": "https://www.zdic.net/hans/%E6%B5%81%E8%A8%80%E8%9C%9A%E8%AF%AD",
+      "py": "liú yán fēi yǔ",
+      "abbr": "lyfy"
     },
     {
       "w": "浅吟低唱",
@@ -2746,7 +3002,9 @@
       "pending": true,
       "def": "消除；平息",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%B6%88%E5%BC%AD"
+      "srcUrl": "https://www.zdic.net/hans/%E6%B6%88%E5%BC%AD",
+      "py": "xiāo mǐ",
+      "abbr": "xm"
     },
     {
       "w": "润物无声",
@@ -2799,7 +3057,9 @@
       "pending": true,
       "def": "指思虑谋划深刻而长远",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E6%B7%B1%E8%BF%9C"
+      "srcUrl": "https://www.zdic.net/hans/%E6%B7%B1%E8%BF%9C",
+      "py": "shēn yuǎn",
+      "abbr": "sy"
     },
     {
       "w": "混淆视听",
@@ -2828,7 +3088,9 @@
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第28题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yuān sǒu",
+      "abbr": "ys"
     },
     {
       "w": "渐变",
@@ -2841,7 +3103,9 @@
       "source": "2020年山东省公务员录用考试《行测》试题（网友回忆版） 第12题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "jiàn biàn",
+      "abbr": "jb"
     },
     {
       "w": "渐行渐远",
@@ -2864,7 +3128,9 @@
       ],
       "source": "2019年河南省选调生选拔考试《行测》试题（网友回忆版） 第9题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "làn yú chōng shù",
+      "abbr": "lycs"
     },
     {
       "w": "漠视",
@@ -2908,7 +3174,9 @@
       ],
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第28题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "jī fā",
+      "abbr": "jf"
     },
     {
       "w": "灵活",
@@ -2920,7 +3188,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第23题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "líng huó",
+      "abbr": "lh"
     },
     {
       "w": "熟悉",
@@ -2952,7 +3222,9 @@
       "pending": true,
       "def": "国家的疆域范围",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E7%89%88%E5%9B%BE"
+      "srcUrl": "https://www.zdic.net/hans/%E7%89%88%E5%9B%BE",
+      "py": "bǎn tú",
+      "abbr": "bt"
     },
     {
       "w": "特例",
@@ -2964,7 +3236,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tè lì",
+      "abbr": "tl"
     },
     {
       "w": "特殊性",
@@ -2978,7 +3252,9 @@
       "pending": true,
       "def": "不同于一般事物的性质",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E7%89%B9%E6%AE%8A%E6%80%A7"
+      "srcUrl": "https://www.zdic.net/hans/%E7%89%B9%E6%AE%8A%E6%80%A7",
+      "py": "tè shū xìng",
+      "abbr": "tsx"
     },
     {
       "w": "特色",
@@ -2990,7 +3266,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tè sè",
+      "abbr": "ts"
     },
     {
       "w": "狂放不羁",
@@ -3015,7 +3293,9 @@
       ],
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第21题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dú yī wú èr",
+      "abbr": "dywe"
     },
     {
       "w": "独具慧眼",
@@ -3029,7 +3309,9 @@
       "pending": true,
       "def": "能看到别人看不到的东西，形容眼光敏锐，见解高超；能作出精细判断的(如在质量方面)",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E7%8B%AC%E5%85%B7%E6%85%A7%E7%9C%BC"
+      "srcUrl": "https://www.zdic.net/hans/%E7%8B%AC%E5%85%B7%E6%85%A7%E7%9C%BC",
+      "py": "dú jù huì yǎn",
+      "abbr": "djhy"
     },
     {
       "w": "独善其身",
@@ -3041,7 +3323,9 @@
       ],
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第21题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dú shàn qí shēn",
+      "abbr": "dsqs"
     },
     {
       "w": "独来独往",
@@ -3054,7 +3338,9 @@
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第21题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dú lái dú wǎng",
+      "abbr": "dldw"
     },
     {
       "w": "独树一帜",
@@ -3066,7 +3352,9 @@
       ],
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第21题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dú shù yī zhì",
+      "abbr": "dsyz"
     },
     {
       "w": "独辟蹊径",
@@ -3079,7 +3367,9 @@
       "source": "2025年辽宁省公务员录用考试《行测》题（网友回忆版） 第40题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "dú pì xī jìng",
+      "abbr": "dpxj"
     },
     {
       "w": "狭仄",
@@ -3109,7 +3399,9 @@
       "pending": true,
       "def": "现成的可以立即使用的",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E7%8E%B0%E6%9C%89"
+      "srcUrl": "https://www.zdic.net/hans/%E7%8E%B0%E6%9C%89",
+      "py": "xiàn yǒu",
+      "abbr": "xy"
     },
     {
       "w": "理念",
@@ -3122,7 +3414,9 @@
       ],
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第30题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "lǐ niàn",
+      "abbr": "ln"
     },
     {
       "w": "生态",
@@ -3134,7 +3428,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "shēng tài",
+      "abbr": "st"
     },
     {
       "w": "疏漏",
@@ -3164,7 +3460,9 @@
       ],
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第25题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bǎi chǐ gān tóu",
+      "abbr": "bcgt"
     },
     {
       "w": "百感交集",
@@ -3178,7 +3476,9 @@
       "pending": true,
       "def": "指许多感触交织",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E7%99%BE%E6%84%9F%E4%BA%A4%E9%9B%86"
+      "srcUrl": "https://www.zdic.net/hans/%E7%99%BE%E6%84%9F%E4%BA%A4%E9%9B%86",
+      "py": "bǎi gǎn jiāo jí",
+      "abbr": "bgjj"
     },
     {
       "w": "皮里阳秋",
@@ -3189,7 +3489,9 @@
       ],
       "source": "2020年海南公务员录用考试《行测》试题（网友回忆版） 第28题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "pí lǐ yáng qiū",
+      "abbr": "plyq"
     },
     {
       "w": "直观",
@@ -3201,7 +3503,9 @@
       ],
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第31题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zhí guān",
+      "abbr": "zg"
     },
     {
       "w": "相得益彰",
@@ -3212,7 +3516,9 @@
       ],
       "source": "2026年黑龙江公务员录用考试《行测》题（网友回忆版） 第32题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "xiāng dé yì zhāng",
+      "abbr": "xdyz"
     },
     {
       "w": "相辅相成",
@@ -3224,7 +3530,9 @@
       "source": "2026年黑龙江公务员录用考试《行测》题（网友回忆版） 第32题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "xiāng fǔ xiāng chéng",
+      "abbr": "xfxc"
     },
     {
       "w": "真实",
@@ -3253,7 +3561,9 @@
       "pending": true,
       "def": "比喻大家所知道的都不全面，各说各的，作无谓的争执",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E7%9E%8E%E5%AD%90%E6%91%B8%E8%B1%A1"
+      "srcUrl": "https://www.zdic.net/hans/%E7%9E%8E%E5%AD%90%E6%91%B8%E8%B1%A1",
+      "py": "xiā zi mō xiàng",
+      "abbr": "xzmx"
     },
     {
       "w": "短暂",
@@ -3266,7 +3576,9 @@
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "duǎn zàn",
+      "abbr": "dz"
     },
     {
       "w": "磨炼",
@@ -3297,7 +3609,9 @@
       "pending": true,
       "def": "泛称记载轶闻琐事的文字",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E7%A8%97%E5%AE%98%E9%87%8E%E5%8F%B2"
+      "srcUrl": "https://www.zdic.net/hans/%E7%A8%97%E5%AE%98%E9%87%8E%E5%8F%B2",
+      "py": "bài guān yě shǐ",
+      "abbr": "bgys"
     },
     {
       "w": "符合",
@@ -3327,7 +3641,9 @@
       ],
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第30题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "cè lüè",
+      "abbr": "cl"
     },
     {
       "w": "粗浅",
@@ -3341,7 +3657,9 @@
       "pending": true,
       "def": "浅显而不深奥",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E7%B2%97%E6%B5%85"
+      "srcUrl": "https://www.zdic.net/hans/%E7%B2%97%E6%B5%85",
+      "py": "cū qiǎn",
+      "abbr": "cq"
     },
     {
       "w": "精密",
@@ -3416,7 +3734,9 @@
       "source": "2025年河北省公务员录用考试《行测》题（网友回忆版） 第58题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "fán fù",
+      "abbr": "ff"
     },
     {
       "w": "纤尘不染",
@@ -3429,7 +3749,9 @@
       "pending": true,
       "def": "一点灰尘也没有。形容非常的干净。清．洪升也作「一尘不染」",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E7%BA%A4%E5%B0%98%E4%B8%8D%E6%9F%93"
+      "srcUrl": "https://www.zdic.net/hans/%E7%BA%A4%E5%B0%98%E4%B8%8D%E6%9F%93",
+      "py": "xiān chén bù rǎn",
+      "abbr": "xcbr"
     },
     {
       "w": "纤毫毕现",
@@ -3454,7 +3776,9 @@
       "source": "2026年湖北省公务员录用考试《行测》题（网友回忆版） 第31题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "xì zhì",
+      "abbr": "xz"
     },
     {
       "w": "统一性",
@@ -3480,7 +3804,9 @@
       ],
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第27题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "mián yán bù duàn",
+      "abbr": "mybd"
     },
     {
       "w": "缓慢",
@@ -3492,7 +3818,9 @@
       ],
       "source": "2020年山东省公务员录用考试《行测》试题（网友回忆版） 第12题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "huǎn màn",
+      "abbr": "hm"
     },
     {
       "w": "缘木求鱼",
@@ -3521,7 +3849,9 @@
       "source": "2022年陕西省公务员录用考试《行测》题（网友回忆版） 第21题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "měi bù shèng shōu",
+      "abbr": "mbss"
     },
     {
       "w": "美轮美奂",
@@ -3534,7 +3864,9 @@
       ],
       "source": "2022年陕西省公务员录用考试《行测》题（网友回忆版） 第21题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "měi lún měi huàn",
+      "abbr": "mlmh"
     },
     {
       "w": "群英荟萃",
@@ -3562,7 +3894,7 @@
       "src": "汉典",
       "srcUrl": "https://www.zdic.net/hans/%E8%80%B3%E6%8F%90%E9%9D%A2%E5%91%BD",
       "py": "ěr tí miàn mìng",
-      "abbr": "tmm"
+      "abbr": "etmm"
     },
     {
       "w": "联想",
@@ -3575,7 +3907,9 @@
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "lián xiǎng",
+      "abbr": "lx"
     },
     {
       "w": "聚合",
@@ -3589,7 +3923,9 @@
       "source": "2026年河北省公务员录用考试《行测》题（网友回忆版） 第61题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "jù hé",
+      "abbr": "jh"
     },
     {
       "w": "聚拢",
@@ -3604,7 +3940,9 @@
       "pending": true,
       "def": "聚集在一起",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E8%81%9A%E6%8B%A2"
+      "srcUrl": "https://www.zdic.net/hans/%E8%81%9A%E6%8B%A2",
+      "py": "jù lǒng",
+      "abbr": "jl"
     },
     {
       "w": "聚积",
@@ -3634,7 +3972,9 @@
       "source": "2020年江苏省公务员录用考试《行测》题（C类）（网友回忆版） 第33题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bèi dào ér chí",
+      "abbr": "bdec"
     },
     {
       "w": "胡编乱造",
@@ -3664,7 +4004,9 @@
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第25题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tuō yǐng ér chū",
+      "abbr": "tyec"
     },
     {
       "w": "自然",
@@ -3692,7 +4034,9 @@
       ],
       "source": "2025年辽宁省公务员录用考试《行测》题（网友回忆版） 第40题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zì shuō zì huà",
+      "abbr": "zszh"
     },
     {
       "w": "良莠不齐",
@@ -3703,7 +4047,9 @@
       ],
       "source": "2023年山东省公务员录用考试《行测》试题（网友回忆版） 第12题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "liáng yǒu bù qí",
+      "abbr": "lybq"
     },
     {
       "w": "花开遍地",
@@ -3772,7 +4118,9 @@
       ],
       "source": "2020年海南公务员录用考试《行测》试题（网友回忆版） 第28题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "péng bì shēng huī",
+      "abbr": "pbsh"
     },
     {
       "w": "蔑视",
@@ -3786,7 +4134,9 @@
       ],
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第30题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "miè shì",
+      "abbr": "ms"
     },
     {
       "w": "藏龙卧虎",
@@ -3798,7 +4148,9 @@
       ],
       "source": "河南省2019年统一考试录用司法所公务员《行测》题（网友回忆版） 第4题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "cáng lóng wò hǔ",
+      "abbr": "clwh"
     },
     {
       "w": "虚实相生",
@@ -3823,7 +4175,9 @@
       "pending": true,
       "def": "心胸像山谷那样深广，形容非常谦虚，能容纳不同意见",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E8%99%9A%E6%80%80%E8%8B%A5%E8%B0%B7"
+      "srcUrl": "https://www.zdic.net/hans/%E8%99%9A%E6%80%80%E8%8B%A5%E8%B0%B7",
+      "py": "xū huái ruò gǔ",
+      "abbr": "xhrg"
     },
     {
       "w": "融会贯通",
@@ -3836,7 +4190,9 @@
       ],
       "source": "2025年湖南省公务员录用考试《行测》题（网友回忆版） 第24题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "róng huì guàn tōng",
+      "abbr": "rhgt"
     },
     {
       "w": "要素",
@@ -3848,7 +4204,9 @@
       ],
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第25题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yào sù",
+      "abbr": "ys"
     },
     {
       "w": "触手可及",
@@ -3861,7 +4219,9 @@
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第27题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "chù shǒu kě jí",
+      "abbr": "cskj"
     },
     {
       "w": "警示",
@@ -3873,7 +4233,9 @@
       ],
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "jǐng shì",
+      "abbr": "js"
     },
     {
       "w": "认清",
@@ -3886,7 +4248,9 @@
       ],
       "source": "2025年湖南省公务员录用考试《行测》题（网友回忆版） 第26题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "rèn qīng",
+      "abbr": "rq"
     },
     {
       "w": "设计",
@@ -3915,7 +4279,9 @@
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第23题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yòu dǎo",
+      "abbr": "yd"
     },
     {
       "w": "调控",
@@ -3943,7 +4309,9 @@
       ],
       "source": "2020年江苏省公务员录用考试《行测》题（C类）（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "mào hé shén lí",
+      "abbr": "mhsl"
     },
     {
       "w": "贵重",
@@ -3971,7 +4339,9 @@
       ],
       "source": "2025年甘肃公务员录用考试《行测》题（网友回忆版） 第25题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zī běn",
+      "abbr": "zb"
     },
     {
       "w": "赏心悦目",
@@ -3984,7 +4354,9 @@
       ],
       "source": "2022年陕西省公务员录用考试《行测》题（网友回忆版） 第21题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "shǎng xīn yuè mù",
+      "abbr": "sxym"
     },
     {
       "w": "跃然纸上",
@@ -3997,7 +4369,9 @@
       "source": "2026年天津市公务员录用考试《行测》题（网友回忆版） 第28题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yuè rán zhǐ shàng",
+      "abbr": "yrzs"
     },
     {
       "w": "跨越",
@@ -4045,7 +4419,9 @@
       ],
       "source": "2025年湖南省公务员录用考试《行测》题（网友回忆版） 第24题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yíng hé",
+      "abbr": "yh"
     },
     {
       "w": "连续",
@@ -4057,7 +4433,9 @@
       ],
       "source": "2020年山东省公务员录用考试《行测》试题（网友回忆版） 第12题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "lián xù",
+      "abbr": "lx"
     },
     {
       "w": "适宜",
@@ -4069,7 +4447,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第23题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "shì yí",
+      "abbr": "sy"
     },
     {
       "w": "适当",
@@ -4098,7 +4478,9 @@
       ],
       "source": "2025年河北省公务员录用考试《行测》题（网友回忆版） 第57题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tōng sú",
+      "abbr": "ts"
     },
     {
       "w": "通达",
@@ -4127,7 +4509,9 @@
       ],
       "source": "2019年河南省选调生选拔考试《行测》试题（网友回忆版） 第9题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yì wén yì shì",
+      "abbr": "ywys"
     },
     {
       "w": "逼仄",
@@ -4140,7 +4524,9 @@
       "source": "2022年青海省公务员录用考试《行测》题（网友回忆版） 第26题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "bī zè",
+      "abbr": "bz"
     },
     {
       "w": "道听途说",
@@ -4168,7 +4554,9 @@
       ],
       "source": "2026年黑龙江公务员录用考试《行测》题（网友回忆版） 第32题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yáo xiàng hū yīng",
+      "abbr": "yxhy"
     },
     {
       "w": "释放",
@@ -4180,7 +4568,9 @@
       ],
       "source": "2020年江苏省公务员录用考试《行测》题（C类）（网友回忆版） 第33题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "shì fàng",
+      "abbr": "sf"
     },
     {
       "w": "重生",
@@ -4193,7 +4583,9 @@
       "source": "2020年江苏省公务员录用考试《行测》题（C类）（网友回忆版） 第33题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "zhòng shēng",
+      "abbr": "zs"
     },
     {
       "w": "钟灵毓秀",
@@ -4224,7 +4616,9 @@
       "source": "2022年陕西省公务员录用考试《行测》题（网友回忆版） 第21题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "cuò luò yǒu zhì",
+      "abbr": "clyz"
     },
     {
       "w": "闪动跳跃",
@@ -4246,7 +4640,9 @@
       ],
       "source": "2026年四川省考/选调公务员录用考试《行测》试题（网友回忆版） 第27题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "wén guò zé xǐ",
+      "abbr": "wgzx"
     },
     {
       "w": "阴霾",
@@ -4274,7 +4670,9 @@
       ],
       "source": "2022年青海省公务员录用考试《行测》题（网友回忆版） 第26题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "xiǎn zè",
+      "abbr": "xz"
     },
     {
       "w": "随意性",
@@ -4307,7 +4705,9 @@
       ],
       "source": "2025年云南省公务员录用考试《行测》题（网友回忆版） 第25题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "suí bō zhú liú",
+      "abbr": "sbzl"
     },
     {
       "w": "雕琢",
@@ -4351,7 +4751,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第21题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "qīng huáng bù jiē",
+      "abbr": "qhbj"
     },
     {
       "w": "静谧",
@@ -4378,7 +4780,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第21题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "gù cǐ shī bǐ",
+      "abbr": "gcsb"
     },
     {
       "w": "预设",
@@ -4404,7 +4808,9 @@
       ],
       "source": "2026年河北省公务员录用考试《行测》题（网友回忆版） 第61题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "tuí shì",
+      "abbr": "ts"
     },
     {
       "w": "风情",
@@ -4459,7 +4865,9 @@
       ],
       "source": "2019年河南省选调生选拔考试《行测》试题（网友回忆版） 第9题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "yú mù hùn zhū",
+      "abbr": "ymhz"
     },
     {
       "w": "鱼龙混杂",
@@ -4489,7 +4897,9 @@
       "source": "2026年浙江省公务员录用考试《行测》题（C类）（网友回忆版） 第28题",
       "seen": 1,
       "hit": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "xiān huó",
+      "abbr": "xh"
     },
     {
       "w": "鳞次栉比",
@@ -4504,7 +4914,9 @@
       "pending": true,
       "def": "像鱼鳞和梳子齿一样紧密整齐地排列",
       "src": "汉典",
-      "srcUrl": "https://www.zdic.net/hans/%E9%B3%9E%E6%AC%A1%E6%A0%89%E6%AF%94"
+      "srcUrl": "https://www.zdic.net/hans/%E9%B3%9E%E6%AC%A1%E6%A0%89%E6%AF%94",
+      "py": "lín cì jié bì",
+      "abbr": "lcjb"
     },
     {
       "w": "黔驴技穷",
@@ -4515,7 +4927,9 @@
       ],
       "source": "2026年贵州省公务员录用考试《行测》题（网友回忆版） 第21题",
       "seen": 1,
-      "src": "exam"
+      "src": "exam",
+      "py": "qián lǘ jì qióng",
+      "abbr": "qljq"
     },
     {
       "w": "龙蛇混杂",
