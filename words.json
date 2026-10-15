@@ -1,5 +1,5 @@
 {
-  "version": "2026.10.15.6",
+  "version": "2026.10.15.7",
   "updated": "2026-10-15",
   "note": "考公逻辑填空高频词语库。字段对应功能一：def/key=意思和要点，pos=词性，tone=褒贬意，modifies=用来修饰什么，subject=主语应该是谁。",
   "words": [
@@ -742,7 +742,8 @@
       "seen": 1,
       "src": "exam",
       "py": "wǔ cǎi bān lán",
-      "abbr": "wcbl"
+      "abbr": "wcbl",
+      "key": "解析指出与“现代化进程”搭配不当"
     },
     {
       "w": "亦庄亦谐",
@@ -1029,7 +1030,8 @@
       "seen": 1,
       "src": "exam",
       "py": "bié chū xīn cái",
-      "abbr": "bcxc"
+      "abbr": "bcxc",
+      "subject": "前文陈述的现象"
     },
     {
       "w": "别出机杼",
@@ -1119,7 +1121,8 @@
       "seen": 1,
       "src": "exam",
       "py": "lì bó cái shū",
-      "abbr": "lbcs"
+      "abbr": "lbcs",
+      "key": "解析指出与“理论”搭配不当"
     },
     {
       "w": "劣势",
@@ -1461,7 +1464,8 @@
       "seen": 1,
       "src": "exam",
       "py": "zēng shè",
-      "abbr": "zs"
+      "abbr": "zs",
+      "key": "解析指出与“历史感”搭配不当"
     },
     {
       "w": "增进",
@@ -1475,7 +1479,8 @@
       "seen": 1,
       "src": "exam",
       "py": "zēng jìn",
-      "abbr": "zj"
+      "abbr": "zj",
+      "key": "解析指出与“历史感”搭配不当"
     },
     {
       "w": "增量",
@@ -1685,7 +1690,8 @@
       "src": "汉典",
       "srcUrl": "https://www.zdic.net/hans/%E5%AE%81%E9%9D%99",
       "py": "níng jìng",
-      "abbr": "nj"
+      "abbr": "nj",
+      "modifies": "环境"
     },
     {
       "w": "安静",
@@ -1792,7 +1798,8 @@
       "seen": 1,
       "src": "exam",
       "py": "kuān kuò",
-      "abbr": "kk"
+      "abbr": "kk",
+      "key": "解析指出与“推进路径”搭配不当"
     },
     {
       "w": "密封",
@@ -1869,7 +1876,8 @@
       "seen": 1,
       "src": "exam",
       "py": "shān qīng shuǐ xiù",
-      "abbr": "sqsx"
+      "abbr": "sqsx",
+      "key": "解析指出与“文化底蕴”搭配不当"
     },
     {
       "w": "山穷水尽",
@@ -2217,7 +2225,8 @@
       "seen": 1,
       "src": "exam",
       "py": "tóu hé",
-      "abbr": "th"
+      "abbr": "th",
+      "key": "解析指出与“艺术特征”搭配不当"
     },
     {
       "w": "抽象",
@@ -2324,7 +2333,8 @@
       "seen": 1,
       "src": "exam",
       "py": "tuī qiāo",
-      "abbr": "tq"
+      "abbr": "tq",
+      "key": "解析指出与“时间”搭配不当"
     },
     {
       "w": "掩耳盗铃",
@@ -2364,7 +2374,8 @@
       "seen": 1,
       "src": "exam",
       "py": "gǎi xián gēng zhāng",
-      "abbr": "gxgz"
+      "abbr": "gxgz",
+      "key": "解析指出与“文艺作品”搭配不当"
     },
     {
       "w": "故步自封",
@@ -2756,7 +2767,9 @@
       "seen": 1,
       "src": "exam",
       "py": "sōng xiè",
-      "abbr": "sx"
+      "abbr": "sx",
+      "modifies": "态度、纪律松散",
+      "key": "解析指出与“环节”搭配不当"
     },
     {
       "w": "标准",
@@ -2926,7 +2939,9 @@
       "src": "汉典",
       "srcUrl": "https://www.zdic.net/hans/%E6%B1%B9%E6%B6%8C%E6%BE%8E%E6%B9%83",
       "py": "xiōng yǒng péng pài",
-      "abbr": "xypp"
+      "abbr": "xypp",
+      "modifies": "声势浩大",
+      "key": "解析指出与“现代化进程”搭配不当"
     },
     {
       "w": "波澜壮阔",
@@ -3176,7 +3191,8 @@
       "seen": 1,
       "src": "exam",
       "py": "jī fā",
-      "abbr": "jf"
+      "abbr": "jf",
+      "key": "解析指出与“研究主题”搭配不当"
     },
     {
       "w": "灵活",
@@ -3224,7 +3240,8 @@
       "src": "汉典",
       "srcUrl": "https://www.zdic.net/hans/%E7%89%88%E5%9B%BE",
       "py": "bǎn tú",
-      "abbr": "bt"
+      "abbr": "bt",
+      "key": "解析指出与“信息传播”搭配不当"
     },
     {
       "w": "特例",
@@ -3806,7 +3823,8 @@
       "seen": 1,
       "src": "exam",
       "py": "mián yán bù duàn",
-      "abbr": "mybd"
+      "abbr": "mybd",
+      "key": "解析指出与“民生幸福”搭配不当"
     },
     {
       "w": "缓慢",
@@ -3866,7 +3884,8 @@
       "seen": 1,
       "src": "exam",
       "py": "měi lún měi huàn",
-      "abbr": "mlmh"
+      "abbr": "mlmh",
+      "key": "解析指出与“田园画卷”搭配不当"
     },
     {
       "w": "群英荟萃",
@@ -4036,7 +4055,8 @@
       "seen": 1,
       "src": "exam",
       "py": "zì shuō zì huà",
-      "abbr": "zszh"
+      "abbr": "zszh",
+      "key": "解析指出与“文艺作品”搭配不当"
     },
     {
       "w": "良莠不齐",
@@ -4049,7 +4069,8 @@
       "seen": 1,
       "src": "exam",
       "py": "liáng yǒu bù qí",
-      "abbr": "lybq"
+      "abbr": "lybq",
+      "key": "解析指出与“谣言”搭配不当"
     },
     {
       "w": "花开遍地",
@@ -4136,7 +4157,8 @@
       "seen": 1,
       "src": "exam",
       "py": "miè shì",
-      "abbr": "ms"
+      "abbr": "ms",
+      "key": "解析指出与“品质和服务”搭配不当"
     },
     {
       "w": "藏龙卧虎",
@@ -4150,7 +4172,8 @@
       "seen": 1,
       "src": "exam",
       "py": "cáng lóng wò hǔ",
-      "abbr": "clwh"
+      "abbr": "clwh",
+      "key": "解析指出与“文化底蕴”搭配不当"
     },
     {
       "w": "虚实相生",
@@ -4341,7 +4364,8 @@
       "seen": 1,
       "src": "exam",
       "py": "zī běn",
-      "abbr": "zb"
+      "abbr": "zb",
+      "key": "解析指出与“市场空间广阔”搭配不当"
     },
     {
       "w": "赏心悦目",
@@ -4480,7 +4504,8 @@
       "seen": 1,
       "src": "exam",
       "py": "tōng sú",
-      "abbr": "ts"
+      "abbr": "ts",
+      "key": "解析指出与“理解”搭配不当"
     },
     {
       "w": "通达",
