@@ -166,21 +166,20 @@
     <!-- 数据 -->
     <section id="tab-data" hidden>
       <div class="card">
-        <strong>导入试卷分析词表</strong>
-        <p class="hint">一行一个词。重复出现的词会被计数并标注「重复」。不在词库里的词会先收进来并标记待补释义。</p>
-        <textarea id="import-text" placeholder="一蹴而就&#10;立竿见影&#10;一蹴而就&#10;首当其冲"></textarea>
+        <strong>本机词库</strong>
+        <p class="hint">词库以 <code>words.json</code> 为准，每次打开自动检查更新，不需要手动维护。双击打开本页（file://）时浏览器不允许自动读取，用下面按钮选一次文件即可。</p>
         <div class="row" style="margin-top:10px">
-          <button id="btn-import" class="primary">导入并统计</button>
-          <button id="btn-import-file" class="ghost">导入词库文件（words.json）</button>
+          <button id="btn-import-file" class="primary">选择 words.json 导入</button>
           <input type="file" id="file-input" accept=".json,application/json" hidden>
         </div>
       </div>
       <div class="card">
-        <strong>导出 / 备份</strong>
-        <p class="hint">导出包含使用统计、待补释义词和当前词库版本，可作为下次合并的输入。</p>
+        <strong>备份与清理</strong>
+        <p class="hint">导出的只有本机的查询与掌握记录。<strong>清除本机数据</strong>会连词库缓存一起清掉，联网状态下会自动重新拉取。</p>
         <div class="row" style="margin-top:10px">
           <button id="btn-export">导出统计 JSON</button>
           <button id="btn-reset" class="ghost">清空统计</button>
+          <button id="btn-clear-all" class="ghost">清除本机数据</button>
         </div>
       </div>
       <div class="card">
@@ -198,32 +197,41 @@
 const DB_URL = "words.json";
 const K_DB = "kg.db.v1";        // cached library {version, updated, words[]}
 const K_STATS = "kg.stats.v1";  // per word: {q, known, unknown, collected, dup, last}
-const K_LOCAL = "kg.local.v1";  // words added locally (not in the published library)
+const K_LEGACY_LOCAL = "kg.local.v1"; // retired: words used to be addable by hand, local-only
 
 const $ = (id) => document.getElementById(id);
-const state = { db: { version: "—", updated: "", words: [] }, stats: {}, local: [], drill: { i: 0, flipped: false, filter: "all", list: [] } };
+const state = { db: { version: "—", updated: "", words: [] }, stats: {}, drill: { i: 0, flipped: false, filter: "all", list: [] } };
 
 // ---------------------------------------------------------------- storage
 
 function loadStore() {
   try { state.stats = JSON.parse(localStorage.getItem(K_STATS) || "{}") || {}; } catch { state.stats = {}; }
-  try { state.local = JSON.parse(localStorage.getItem(K_LOCAL) || "[]") || []; } catch { state.local = []; }
   let cached = null;
   try { cached = JSON.parse(localStorage.getItem(K_DB) || "null"); } catch { cached = null; }
   if (cached && Array.isArray(cached.words)) state.db = cached;
 }
 const saveStats = () => localStorage.setItem(K_STATS, JSON.stringify(state.stats));
-const saveLocal = () => localStorage.setItem(K_LOCAL, JSON.stringify(state.local));
 const saveDb = () => localStorage.setItem(K_DB, JSON.stringify(state.db));
+
+// Wipe everything this page keeps on this device and start over. The library is re-fetched when
+// the page can reach words.json, so clearing it is not destructive on the deployed site.
+async function clearLocalData() {
+  if (!confirm("清除本机数据？将删掉这台设备上的词库缓存和查询/掌握记录。联网状态下会立刻重新拉取词库。")) return;
+  for (const key of [K_DB, K_STATS, K_LEGACY_LOCAL]) localStorage.removeItem(key);
+  state.stats = {};
+  state.db = { version: "—", updated: "", words: [] };
+  renderMeta(false);
+  renderAll();
+  toast("已清除本机数据");
+  if (location.protocol !== "file:") await checkUpdate(false);
+}
 
 // ---------------------------------------------------------------- library
 
 function allWords() {
-  // published library first; locally collected words are appended, marked as pending
   const seen = new Set();
   const out = [];
   for (const w of state.db.words) { if (!seen.has(w.w)) { seen.add(w.w); out.push(w); } }
-  for (const w of state.local) { if (!seen.has(w.w)) { seen.add(w.w); out.push(w); } }
   return out;
 }
 const findWord = (v) => allWords().find((w) => w.w === v) || null;
@@ -237,13 +245,13 @@ function renderMeta(note) {
   $("ver").textContent = "词库 " + state.db.version;
   $("cnt").textContent = allWords().length + " 词";
   if (note) $("ver").classList.toggle("stale", !!note);
-  const pending = state.local.length;
+  const inUse = Object.values(state.stats).filter((s) => s.q || s.known || s.unknown || s.collected).length;
   $("db-status").innerHTML =
     "版本：<strong>" + esc(state.db.version) + "</strong>" +
     (state.db.updated ? "（" + esc(state.db.updated) + "）" : "") + "<br>" +
-    "已发布词条：" + state.db.words.length + " 条<br>" +
-    "本地新增待补释义：" + pending + " 条<br>" +
-    "数据存放：浏览器 localStorage（不上传任何服务器）";
+    "词条：" + state.db.words.length + " 条<br>" +
+    "本机有记录的词：" + inUse + " 条<br>" +
+    "数据存放：这台设备的浏览器 localStorage，不会同步到别的设备";
 }
 
 // Pull the published library and swap it in when the version changed.
@@ -447,37 +455,11 @@ function drillMark(kind) {
 
 // ---------------------------------------------------------------- import / export
 
-// 功能二：试卷分析词表导入。同一词语出现多次即计入「重复」。
-function importWordList(text) {
-  const lines = text.split(/[\n,，、;；\t]+/).map((s) => s.trim()).filter(Boolean);
-  if (!lines.length) { toast("没有读到词语"); return; }
-  const counts = new Map();
-  for (const l of lines) counts.set(l, (counts.get(l) || 0) + 1);
-
-  let repeats = 0, added = 0;
-  for (const [word, n] of counts) {
-    const s = stat(word);
-    s.collected += n;
-    s.last = Date.now();
-    if (n > 1) { s.dup += n - 1; repeats += n - 1; }
-    if (!findWord(word)) {
-      state.local.push({ w: word, abbr: "", py: "", def: "", key: "", pos: "", tone: "", modifies: "", subject: "", tags: ["待补释义"], pending: true });
-      added += 1;
-    }
-  }
-  saveStats();
-  saveLocal();
-  renderMeta(false);
-  renderAll();
-  toast("导入 " + counts.size + " 个词，新增 " + added + " 条待补释义，标注重复 " + repeats + " 次");
-}
-
 function exportJson() {
   const payload = {
     exportedAt: new Date().toISOString(),
     dbVersion: state.db.version,
-    stats: state.stats,
-    localWords: state.local
+    stats: state.stats
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
@@ -488,32 +470,27 @@ function exportJson() {
   toast("已导出");
 }
 
+// The only file this page imports is words.json (needed when opened via file://).
 function readFile(file) {
   const reader = new FileReader();
   reader.onload = () => {
-    const text = String(reader.result);
+    let json;
     try {
-      const json = JSON.parse(text);
-      if (Array.isArray(json.words)) {
-        const old = state.db.version;
-        state.db = { version: json.version || "本地导入", updated: json.updated || "", words: json.words };
-        saveDb();
-        renderMeta(false);
-        renderAll();
-        toast("词库已导入 " + (old === "—" ? "" : old + " → ") + state.db.version + "（" + json.words.length + " 条）");
-        return;
-      }
-      if (Array.isArray(json.localWords)) {
-        state.local = json.localWords.concat(state.local);
-        if (json.stats) state.stats = Object.assign(state.stats, json.stats);
-        saveLocal(); saveStats(); renderMeta(false); renderAll();
-        toast("统计已合并");
-        return;
-      }
-      toast("这个 JSON 里没有 words 字段");
+      json = JSON.parse(String(reader.result));
     } catch {
-      importWordList(text);
+      toast("这个文件不是有效的 JSON");
+      return;
     }
+    if (!Array.isArray(json.words)) {
+      toast("这个 JSON 里没有 words 字段，不是词库文件");
+      return;
+    }
+    const old = state.db.version;
+    state.db = { version: json.version || "本地导入", updated: json.updated || "", words: json.words };
+    saveDb();
+    renderMeta(false);
+    renderAll();
+    toast("词库已导入 " + (old === "—" ? "" : old + " → ") + state.db.version + "（" + json.words.length + " 条）");
   };
   reader.readAsText(file, "utf-8");
 }
@@ -565,10 +542,10 @@ function wire() {
     }
   });
   $("btn-update").addEventListener("click", () => checkUpdate(true));
-  $("btn-import").addEventListener("click", () => importWordList($("import-text").value));
   $("btn-import-file").addEventListener("click", () => $("file-input").click());
   $("file-input").addEventListener("change", (e) => { if (e.target.files[0]) readFile(e.target.files[0]); e.target.value = ""; });
   $("btn-export").addEventListener("click", exportJson);
+  $("btn-clear-all").addEventListener("click", clearLocalData);
   $("btn-reset").addEventListener("click", () => {
     if (!confirm("清空所有查询与掌握记录？词库本身不受影响。")) return;
     state.stats = {};
