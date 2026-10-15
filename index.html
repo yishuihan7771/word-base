@@ -340,7 +340,6 @@ function detailHtml(w, withActions) {
     ["用来修饰", esc(w.modifies || "—")],
     ["主语", esc(w.subject || "—")],
   ];
-  if (w.source) rows.push(["真题", esc(w.source)]);
   if (w.seen) {
     rows.push(["选项出现", w.seen + " 次，其中正确答案 " + (w.hit || 0) + " 次"]);
   }
