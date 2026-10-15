@@ -118,6 +118,7 @@
     <div class="meta">
       <span class="chip" id="ver">词库 —</span>
       <span class="chip" id="cnt">0 词</span>
+      <button id="btn-install" class="primary" hidden>添加到桌面</button>
       <button id="btn-fullscreen" class="ghost">全屏</button>
       <button id="btn-update" class="ghost">检查更新</button>
     </div>
@@ -191,12 +192,13 @@
         </div>
       </div>
       <div class="card">
-        <strong>装成全屏应用（手机防误触）</strong>
+        <strong>装成桌面应用（手机防误触）</strong>
         <p class="hint">
-          在手机浏览器里打开本站 → 菜单里选<strong>「添加到主屏幕」</strong>，之后从桌面图标打开就是<strong>全屏</strong>：
-          没有地址栏和标签栏，不会误点跳走，下拉也不会刷新页面。<br>
-          安卓 Chrome：右上角 ⋮ → 添加到主屏幕；iPhone Safari：底部分享 ↑ → 添加到主屏幕。<br>
-          临时用一次全屏，点右上角「全屏」按钮（iOS Safari 不支持，只能走上面的方法）。
+          手机浏览器里点右上角<strong>「添加到桌面」</strong>即可一键装成应用；装好后从桌面图标打开就是<strong>全屏</strong>——
+          没有地址栏和标签栏，不会误点跳走，下拉也不刷新页面。<br>
+          安卓 Chrome：按钮会直接唤起系统安装框。<br>
+          iPhone Safari：系统没有开放这个接口，只能点底部<strong>分享 ↑</strong> → 添加到主屏幕。<br>
+          临时用一次全屏，点右上角「全屏」（iOS Safari 不支持）
         </p>
       </div>
       <div class="card">
@@ -652,6 +654,73 @@ function syncFullscreenButton() {
   btn.textContent = fullscreenElement() ? "退出全屏" : "全屏";
 }
 
+// ---------------------------------------------------------------- 一键添加到桌面
+
+// 安卓 Chrome 会发 beforeinstallprompt，抓住它就能一键唤起系统安装框；
+// iPhone Safari 没有这个事件，也没有任何 API 能触发安装，只能提示走「分享 → 添加到主屏幕」。
+let installEvent = null;
+
+function isIOS() {
+  const ua = (window.navigator && window.navigator.userAgent) || "";
+  return /iPad|iPhone|iPod/.test(ua);
+}
+function installDismissed() {
+  try { return localStorage.getItem("kg.install.v1") === "dismissed"; } catch { return false; }
+}
+function markInstallDismissed() {
+  try { localStorage.setItem("kg.install.v1", "dismissed"); } catch {}
+}
+
+function syncInstallButton() {
+  const btn = $("btn-install");
+  if (!btn) return;
+  const usable = !!installEvent || isIOS();
+  btn.hidden = isStandalone() || installDismissed() || !usable;
+}
+
+function startInstall() {
+  if (installEvent) {
+    const ev = installEvent;
+    installEvent = null;  // 事件只能用一次
+    let prompted;
+    try { prompted = ev.prompt(); } catch { prompted = null; }
+    Promise.resolve(prompted)
+      .then(() => (ev.userChoice ? ev.userChoice : { outcome: "unknown" }))
+      .then((choice) => {
+        if (choice.outcome === "accepted") toast("已添加到桌面");
+        else { markInstallDismissed(); toast("已取消；以后可从浏览器菜单里添加"); }
+      })
+      .catch(() => {})
+      .then(syncInstallButton);
+    return;
+  }
+  if (isIOS()) {
+    toast("iPhone：点底部「分享」↑ → 添加到主屏幕");
+    return;
+  }
+  toast("这个浏览器不支持一键添加；用浏览器菜单里的「添加到主屏幕」");
+}
+
+// service worker 只为满足可安装条件；注册失败不影响使用，也绝不缓存内容
+function registerServiceWorker() {
+  if (location.protocol === "file:") return;
+  if (!("serviceWorker" in window.navigator)) return;
+  Promise.resolve(window.navigator.serviceWorker.register("sw.js")).catch(() => {});
+}
+
+function wireInstallEvents() {
+  window.addEventListener("beforeinstallprompt", (e) => {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();  // 不自动弹，交给按钮
+    installEvent = e;
+    syncInstallButton();
+  });
+  window.addEventListener("appinstalled", () => {
+    installEvent = null;
+    toast("已添加到桌面，从图标打开就是全屏");
+    syncInstallButton();
+  });
+}
+
 // 读取补充表单里当前填写的内容（未保存的输入也要收下）
 function collectNoteForm() {
   const out = {};
@@ -734,6 +803,7 @@ function wire() {
   });
   $("btn-update").addEventListener("click", () => checkUpdate(true));
   $("btn-fullscreen").addEventListener("click", toggleFullscreen);
+  $("btn-install").addEventListener("click", startInstall);
   document.addEventListener("fullscreenchange", syncFullscreenButton);
   document.addEventListener("webkitfullscreenchange", syncFullscreenButton);
   $("btn-import-file").addEventListener("click", () => $("file-input").click());
@@ -772,9 +842,12 @@ function wire() {
 
 loadStore();
 wire();
+wireInstallEvents();
 renderMeta(false);
 renderAll();
 syncFullscreenButton();
+syncInstallButton();
+registerServiceWorker();
 checkUpdate(false);
 </script>
 </body>

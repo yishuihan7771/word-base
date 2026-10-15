@@ -37,14 +37,20 @@ python tools/check-page.py && node tools/test-page-logic.mjs
 ## 图标与全屏
 
 `index.html` 通过 `manifest.json`（`display: fullscreen`）与 `apple-mobile-web-app-capable`
-支持「添加到主屏幕」后以全屏运行，手机上没有地址栏、不会误点跳走，下拉也不刷新页面。
+支持装成桌面应用后全屏运行，手机上没有地址栏、不会误点跳走，下拉也不刷新页面。
+
+一键添加桌面靠 `beforeinstallprompt`：安卓 Chrome 会发这个事件，页面抓住它、在点按钮时调
+`prompt()` 唤起系统安装框；**iPhone Safari 没有这个事件、也没有任何接口能触发安装**，页面只能提示
+走「分享 → 添加到主屏幕」。`sw.js` 是个穿透式 service worker——Chrome 判定「可安装」需要它，
+但它不缓存任何内容（`fetch` 处理器不调用 `respondWith`），所以不会读到旧页面。
 
 ```bash
 python tools/make-icons.py     # 需要 Pillow；改配色/字样后重跑生成三个图标
 ```
 
 `tools/check-page.py` 会顺带校验：manifest 的 `display` 必须是 `fullscreen`、声明了 `start_url`、
-每个图标在磁盘上存在且尺寸与声明一致。
+每个图标在磁盘上存在且尺寸与声明一致，以及 `sw.js` 有 fetch 处理器且**没有**任何缓存调用
+（用正则只认真实调用，注释里提到的不算）。
 
 ## 字段来源
 

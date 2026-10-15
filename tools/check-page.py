@@ -43,9 +43,23 @@ if re.search(r"function clearLocalData[\s\S]{0,700}K_LEGACY_LOCAL", page) is Non
 for need in ['id="btn-clear-all"', "function clearLocalData", "localStorage.removeItem",
              "K_LEGACY_LOCAL", "kg.notes.v1", "function saveNote", "data-edit",
              'id="btn-fullscreen"', "function toggleFullscreen", "function syncFullscreenButton",
+             'id="btn-install"', "function startInstall", "beforeinstallprompt",
+             "function registerServiceWorker", 'register("sw.js")',
              'rel="manifest"', "apple-mobile-web-app-capable", "overscroll-behavior"]:
     if need not in page:
         problems.append(f"missing {need!r}")
+
+# 3a. service worker：Chrome 判定可安装需要它，且必须不缓存内容（否则会读到旧页面）
+sw_path = ROOT / "sw.js"
+if not sw_path.exists():
+    problems.append("sw.js missing")
+else:
+    sw = sw_path.read_text(encoding="utf-8")
+    if "addEventListener(\"fetch\"" not in sw and "addEventListener('fetch'" not in sw:
+        problems.append("sw.js has no fetch handler (Chrome will not offer install)")
+    # 只认真正的调用；注释里提到 respondWith 不算
+    if re.search(r"\.respondWith\s*\(|caches\.(open|match|keys)\s*\(|cache\.(add|put|addAll)\s*\(", sw):
+        problems.append("sw.js caches responses; it must stay pass-through to avoid stale pages")
 
 # 3b. 全屏清单与图标：装到主屏幕后要能真正全屏
 manifest_path = ROOT / "manifest.json"

@@ -33,11 +33,14 @@ function makeEl(id = "") {
 }
 
 let fileText = wordsText;
-let fsCalls = 0;   // documentElement.requestFullscreen 调用次数
+let fsCalls = 0;          // documentElement.requestFullscreen 调用次数
+let promptCalls = 0;      // 安装框 prompt() 调用次数
+let swCalls = 0;          // serviceWorker.register 调用次数
 function boot({ protocol = "http:", failFetch = false, persist = new Map(), touch = false,
-                standalone = false, noFullscreen = false } = {}) {
+                standalone = false, noFullscreen = false, ios = false, swThrows = false } = {}) {
   const els = new Map();
   const store = persist;
+  const handlers = {};   // window 上的事件处理器，测试里手动触发
   let fetchCalls = 0;
   const documentElement = noFullscreen ? {} : {
     requestFullscreen() { fsCalls++; return Promise.resolve(); },
@@ -48,10 +51,20 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
     location: { protocol, href: protocol === "file:" ? "file:///index.html" : "http://127.0.0.1/" },
     window: {
       scrollTo() {},
-      navigator: { standalone },
+      navigator: {
+        standalone,
+        userAgent: ios ? "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Safari/604.1" : "Mozilla/5.0 (Linux; Android 14) Chrome/125",
+        serviceWorker: {
+          register: () => {
+            swCalls++;
+            return swThrows ? Promise.reject(new Error("nope")) : Promise.resolve({ scope: "x" });
+          },
+        },
+      },
       matchMedia: (q) => ({
         matches: (/pointer:\s*fine/.test(q) && !touch) || (/display-mode/.test(q) && standalone),
       }),
+      addEventListener(type, fn) { (handlers[type] = handlers[type] || []).push(fn); },
     },
     document: {
       documentElement,
@@ -76,7 +89,8 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   context.globalThis = context;
   vm.createContext(context);
   vm.runInContext(script, context, { filename: "index.html" });
-  return { context, els, store, fetchCalls: () => fetchCalls, html: (id) => els.get(id)?.innerHTML ?? "" };
+  const fire = (type, event) => { for (const fn of handlers[type] || []) fn(event); };
+  return { context, els, store, handlers, fire, fetchCalls: () => fetchCalls, html: (id) => els.get(id)?.innerHTML ?? "" };
 }
 
 // ---------------------------------------------------------------- 正常使用
@@ -219,6 +233,73 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   check("不支持全屏时隐藏按钮", unsupported.els.get("btn-fullscreen").hidden, true);
   unsupported.context.toggleFullscreen();
   check("不支持全屏时给出「添加到主屏幕」提示", /添加到主屏幕/.test(unsupported.els.get("toast").textContent), true);
+}
+
+// ---------------------------------------------------------------- 一键添加到桌面
+{
+  // 用 failFetch 起，避免启动时的「词库已载入」提示覆盖掉安装提示（那是异步的）
+  promptCalls = 0;
+  const android = boot({ protocol: "http:", failFetch: true });
+  check("没拿到安装事件前按钮是隐藏的", android.els.get("btn-install").hidden, true);
+
+  let prevented = false;
+  android.fire("beforeinstallprompt", {
+    preventDefault() { prevented = true; },
+    prompt() { promptCalls++; return Promise.resolve(); },
+    userChoice: Promise.resolve({ outcome: "accepted" }),
+  });
+  check("捕获安装事件时阻止浏览器自动弹框", prevented, true);
+  check("拿到安装事件后按钮出现", android.els.get("btn-install").hidden, false);
+
+  android.context.startInstall();
+  check("点按钮会唤起安装框一次", promptCalls, 1);
+  await new Promise((r) => setTimeout(r, 0));
+  check("接受安装后提示已添加", /已添加/.test(android.els.get("toast").textContent), true);
+
+  // 用户在系统框里取消：记下来，不再反复打扰
+  const declineStore = new Map();
+  const decline = boot({ protocol: "http:", failFetch: true, persist: declineStore });
+  decline.fire("beforeinstallprompt", {
+    preventDefault() {},
+    prompt: () => Promise.resolve(),
+    userChoice: Promise.resolve({ outcome: "dismissed" }),
+  });
+  decline.context.startInstall();
+  await new Promise((r) => setTimeout(r, 0));
+  check("取消后记入本机", declineStore.get("kg.install.v1"), "dismissed");
+  decline.context.syncInstallButton();
+  check("取消后按钮不再显示", decline.els.get("btn-install").hidden, true);
+
+  // iOS Safari：没有安装接口，按钮仍要出现并给指路提示
+  const iphone = boot({ protocol: "http:", failFetch: true, ios: true });
+  check("iPhone 上按钮可见", iphone.els.get("btn-install").hidden, false);
+  iphone.context.startInstall();
+  check("iPhone 提示走分享菜单", /分享/.test(iphone.els.get("toast").textContent), true);
+
+  // 已经是桌面应用：不必再提示安装
+  const installed = boot({ protocol: "http:", failFetch: true, standalone: true });
+  check("已装成桌面应用时隐藏安装按钮", installed.els.get("btn-install").hidden, true);
+
+  // 其他浏览器既不支持也不给事件：按钮隐藏，点了有兜底提示
+  const other = boot({ protocol: "http:", failFetch: true });
+  other.context.startInstall();
+  check("不支持时提示用浏览器菜单", /浏览器菜单/.test(other.els.get("toast").textContent), true);
+
+  // service worker：http 下注册一次；注册失败不影响页面；file:// 下不注册
+  swCalls = 0;
+  const swOk = boot({ protocol: "http:", failFetch: true });
+  await new Promise((r) => setTimeout(r, 0));
+  check("http 下注册 service worker", swCalls, 1);
+  check("注册后页面照常可用", swOk.els.get("ver").textContent.startsWith("词库"), true);
+
+  swCalls = 0;
+  const swFail = boot({ protocol: "http:", failFetch: true, swThrows: true });
+  await new Promise((r) => setTimeout(r, 0));
+  check("service worker 注册失败也不中断脚本", swCalls, 1);
+
+  swCalls = 0;
+  boot({ protocol: "file:", failFetch: true });
+  check("file:// 下不注册 service worker", swCalls, 0);
 }
 
 console.log(`\n${failures ? failures + " FAILURE(S)" : "all checks passed"}`);
