@@ -175,7 +175,7 @@
       </div>
       <div class="card">
         <strong>备份与清理</strong>
-        <p class="hint">导出的只有本机的查询与掌握记录。<strong>清除本机数据</strong>会连词库缓存一起清掉，联网状态下会自动重新拉取。</p>
+        <p class="hint">导出的内容包含查询与掌握记录，以及你手写的<strong>补充说明</strong>；换设备时导入这个文件即可带过去。<strong>清除本机数据</strong>会连词库缓存和补充说明一起清掉，联网状态下会自动重新拉取词库。</p>
         <div class="row" style="margin-top:10px">
           <button id="btn-export">导出统计 JSON</button>
           <button id="btn-reset" class="ghost">清空统计</button>
@@ -197,28 +197,57 @@
 const DB_URL = "words.json";
 const K_DB = "kg.db.v1";        // cached library {version, updated, words[]}
 const K_STATS = "kg.stats.v1";  // per word: {q, known, unknown, collected, dup, last}
+const K_NOTES = "kg.notes.v1";  // per word: manual supplement {tone, pos, modifies, subject, note}
 const K_LEGACY_LOCAL = "kg.local.v1"; // retired: words used to be addable by hand, local-only
 
 const $ = (id) => document.getElementById(id);
-const state = { db: { version: "—", updated: "", words: [] }, stats: {}, drill: { i: 0, flipped: false, filter: "all", list: [] } };
+const state = {
+  db: { version: "—", updated: "", words: [] },
+  stats: {},
+  notes: {},
+  editing: "",  // the word whose supplement form is open
+  drill: { i: 0, flipped: false, filter: "all", list: [] },
+};
 
 // ---------------------------------------------------------------- storage
 
 function loadStore() {
   try { state.stats = JSON.parse(localStorage.getItem(K_STATS) || "{}") || {}; } catch { state.stats = {}; }
+  try { state.notes = JSON.parse(localStorage.getItem(K_NOTES) || "{}") || {}; } catch { state.notes = {}; }
   let cached = null;
   try { cached = JSON.parse(localStorage.getItem(K_DB) || "null"); } catch { cached = null; }
   if (cached && Array.isArray(cached.words)) state.db = cached;
 }
 const saveStats = () => localStorage.setItem(K_STATS, JSON.stringify(state.stats));
 const saveDb = () => localStorage.setItem(K_DB, JSON.stringify(state.db));
+const saveNotes = () => localStorage.setItem(K_NOTES, JSON.stringify(state.notes));
+
+// 手动补充：填进 state.notes[word]，展示时覆盖词库里的空字段，不改动 words.json。
+function saveNote(word, fields) {
+  const cleaned = {};
+  for (const [k, v] of Object.entries(fields || {})) {
+    const value = String(v == null ? "" : v).trim();
+    if (value) cleaned[k] = value;
+  }
+  if (Object.keys(cleaned).length) state.notes[word] = cleaned;
+  else delete state.notes[word];
+  saveNotes();
+}
+function clearNote(word) {
+  delete state.notes[word];
+  saveNotes();
+}
+// 词库字段 + 本机补充，补充优先
+const withNote = (w) => Object.assign({}, w, state.notes[w.w] || {});
 
 // Wipe everything this page keeps on this device and start over. The library is re-fetched when
 // the page can reach words.json, so clearing it is not destructive on the deployed site.
 async function clearLocalData() {
-  if (!confirm("清除本机数据？将删掉这台设备上的词库缓存和查询/掌握记录。联网状态下会立刻重新拉取词库。")) return;
-  for (const key of [K_DB, K_STATS, K_LEGACY_LOCAL]) localStorage.removeItem(key);
+  if (!confirm("清除本机数据？将删掉这台设备上的词库缓存、查询/掌握记录，以及你手写的补充说明。联网状态下会立刻重新拉取词库。")) return;
+  for (const key of [K_DB, K_STATS, K_NOTES, K_LEGACY_LOCAL]) localStorage.removeItem(key);
   state.stats = {};
+  state.notes = {};
+  state.editing = "";
   state.db = { version: "—", updated: "", words: [] };
   renderMeta(false);
   renderAll();
@@ -246,11 +275,13 @@ function renderMeta(note) {
   $("cnt").textContent = allWords().length + " 词";
   if (note) $("ver").classList.toggle("stale", !!note);
   const inUse = Object.values(state.stats).filter((s) => s.q || s.known || s.unknown || s.collected).length;
+  const notes = Object.keys(state.notes).length;
   $("db-status").innerHTML =
     "版本：<strong>" + esc(state.db.version) + "</strong>" +
     (state.db.updated ? "（" + esc(state.db.updated) + "）" : "") + "<br>" +
     "词条：" + state.db.words.length + " 条<br>" +
     "本机有记录的词：" + inUse + " 条<br>" +
+    "我补充过的词：" + notes + " 条<br>" +
     "数据存放：这台设备的浏览器 localStorage，不会同步到别的设备";
 }
 
@@ -331,26 +362,66 @@ function openWord(value, countIt) {
 
 const toneClass = (t) => (t === "褒" ? "tag b" : t === "贬" ? "tag p" : "tag n");
 
+// 手动补充表单：褒贬点选，其余可写。填了的内容只存在本机，不改 words.json。
+function noteFormHtml(w, merged) {
+  const mine = state.notes[w.w] || {};
+  const chip = (value, label) =>
+    "<button data-settone='" + value + "' data-w='" + esc(w.w) + "' class='" +
+    (mine.tone === value ? "primary" : "ghost") + "'>" + label + "</button>";
+  const field = (key, label, placeholder) =>
+    "<label style='display:block;margin-top:10px'><span class='counter'>" + label + "</span>" +
+    "<input type='text' data-note='" + key + "' data-w='" + esc(w.w) + "' value='" +
+    esc(mine[key] || merged[key] || "") + "' placeholder='" + placeholder + "' " +
+    "style='margin-top:4px'></label>";
+  return "<div class='card' style='margin-top:14px;background:transparent;box-shadow:none;border-style:dashed'>" +
+    "<div class='row' style='justify-content:space-between'><strong>补充说明</strong>" +
+    "<span class='counter'>只存本机，不同步</span></div>" +
+    "<div class='row' style='margin-top:10px'><span class='counter' style='width:4.5em'>褒贬意</span>" +
+      chip("褒", "褒义") + chip("贬", "贬义") + chip("中性", "中性") +
+      "<button data-settone='' data-w='" + esc(w.w) + "' class='ghost'>清除</button></div>" +
+    field("pos", "词性", "如 成语·动词性") +
+    field("modifies", "用来修饰", "如 事业、改革等需要长期积累的事") +
+    field("subject", "主语", "如 主语多为“事情、工程”") +
+    field("key", "易混辨析", "如 强调见效快，与“旷日持久”对立") +
+    "<label style='display:block;margin-top:10px'><span class='counter'>其他说明</span>" +
+    "<textarea data-note='note' data-w='" + esc(w.w) + "' style='min-height:70px;margin-top:4px' placeholder='看到哪道题里出现过、自己的想法…'>" +
+    esc(mine.note || "") + "</textarea></label>" +
+    "<div class='row' style='margin-top:12px'>" +
+      "<button data-savenote='1' data-w='" + esc(w.w) + "' class='primary'>保存</button>" +
+      "<button data-cancelnote='1' class='ghost'>取消</button>" +
+      (state.notes[w.w] ? "<button data-clearnote='1' data-w='" + esc(w.w) + "' class='ghost'>删除我的补充</button>" : "") +
+    "</div></div>";
+}
+
 function detailHtml(w, withActions) {
   const s = stat(w.w);
+  const merged = withNote(w);
+  const mine = state.notes[w.w] || {};
+  const tag = (key) => (mine[key] ? " <span class='tag'>补充</span>" : "");
+  const editing = state.editing === w.w;
   const rows = [
-    ["意思和要点", esc(w.def || "（待补释义）") + (w.key ? "<br><span style='color:var(--muted)'>辨析：" + esc(w.key) + "</span>" : "")],
-    ["词性", esc(w.pos || "—")],
-    ["褒贬意", "<span class='" + toneClass(w.tone) + "'>" + esc(w.tone || "—") + "</span>"],
-    ["用来修饰", esc(w.modifies || "—")],
-    ["主语", esc(w.subject || "—")],
+    ["意思和要点", esc(merged.def || "（待补释义）") +
+      (merged.key ? "<br><span style='color:var(--muted)'>辨析：" + esc(merged.key) + "</span>" +
+        (mine.key ? "" : "") : "")],
+    ["词性", esc(merged.pos || "—") + tag("pos")],
+    ["褒贬意", "<span class='" + toneClass(merged.tone) + "'>" + esc(merged.tone || "—") + "</span>" + tag("tone")],
+    ["用来修饰", esc(merged.modifies || "—") + tag("modifies")],
+    ["主语", esc(merged.subject || "—") + tag("subject")],
   ];
+  if (merged.note) rows.push(["其他说明", "<span style='white-space:pre-wrap'>" + esc(merged.note) + "</span>"]);
   if (w.seen) {
     rows.push(["选项出现", w.seen + " 次，其中正确答案 " + (w.hit || 0) + " 次"]);
   }
-  if (!w.def) rows.push(["状态", "<span class='tag warn'>待补释义</span>"]);
+  if (!merged.def) rows.push(["状态", "<span class='tag warn'>待补释义</span>"]);
   rows.push(["使用", "查询 " + s.q + " 次 · 收录 " + s.collected + " 次" + (s.dup ? " · 重复 " + s.dup + " 次" : "")]);
   const actions = withActions === false ? "" :
     "<div class='row' style='margin-top:14px'>" +
       "<button data-mark='known' data-w='" + esc(w.w) + "'>已掌握</button>" +
       "<button data-mark='unknown' data-w='" + esc(w.w) + "' class='ghost'>还没掌握</button>" +
+      (editing ? "" : "<button data-edit='1' data-w='" + esc(w.w) + "' class='ghost'>补充说明</button>") +
       "<button class='ghost' onclick=\"document.getElementById('q').value='';renderResults()\">返回列表</button>" +
-    "</div>";
+    "</div>" +
+    (editing ? noteFormHtml(w, merged) : "");
   return "<div class='word-head'><span class='big'>" + esc(w.w) + "</span>" +
     (w.py ? "<span class='counter'>" + esc(w.py) + "</span>" : "") +
     (w.tags || []).map((t) => "<span class='tag'>" + esc(t) + "</span>").join("") + "</div>" +
@@ -458,7 +529,8 @@ function exportJson() {
   const payload = {
     exportedAt: new Date().toISOString(),
     dbVersion: state.db.version,
-    stats: state.stats
+    stats: state.stats,
+    notes: state.notes   // 手写的补充说明，换设备时一并带走
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
@@ -469,7 +541,7 @@ function exportJson() {
   toast("已导出");
 }
 
-// The only file this page imports is words.json (needed when opened via file://).
+// 导入词库文件（words.json），或导出的统计文件（含 notes，用来把补充说明带到新设备）。
 function readFile(file) {
   const reader = new FileReader();
   reader.onload = () => {
@@ -480,16 +552,23 @@ function readFile(file) {
       toast("这个文件不是有效的 JSON");
       return;
     }
-    if (!Array.isArray(json.words)) {
-      toast("这个 JSON 里没有 words 字段，不是词库文件");
+    if (Array.isArray(json.words)) {
+      const old = state.db.version;
+      state.db = { version: json.version || "本地导入", updated: json.updated || "", words: json.words };
+      saveDb();
+      renderMeta(false);
+      renderAll();
+      toast("词库已导入 " + (old === "—" ? "" : old + " → ") + state.db.version + "（" + json.words.length + " 条）");
       return;
     }
-    const old = state.db.version;
-    state.db = { version: json.version || "本地导入", updated: json.updated || "", words: json.words };
-    saveDb();
-    renderMeta(false);
-    renderAll();
-    toast("词库已导入 " + (old === "—" ? "" : old + " → ") + state.db.version + "（" + json.words.length + " 条）");
+    if (json.notes && typeof json.notes === "object") {
+      Object.assign(state.notes, json.notes);
+      saveNotes();
+      renderAll();
+      toast("已导入补充说明 " + Object.keys(json.notes).length + " 条");
+      return;
+    }
+    toast("这个 JSON 里没有 words 字段，不是词库文件");
   };
   reader.readAsText(file, "utf-8");
 }
@@ -510,6 +589,15 @@ function toast(msg) {
 }
 
 function renderAll() { renderResults(); renderStats(); buildDrillList(); }
+
+// 读取补充表单里当前填写的内容（未保存的输入也要收下）
+function collectNoteForm() {
+  const out = {};
+  for (const el of document.querySelectorAll("[data-note]")) {
+    if (el.dataset && el.dataset.note) out[el.dataset.note] = el.value;
+  }
+  return out;
+}
 
 // A real pointer (mouse/trackpad) means a keyboard is already there and focusing the box is
 // helpful. On a touch screen focusing it would pop the soft keyboard the moment a tab is tapped,
@@ -539,7 +627,7 @@ function wire() {
   $("results").addEventListener("click", (e) => {
     if (e.target.closest("[data-import]")) { $("file-input").click(); return; }
     const row = e.target.closest("[data-open]");
-    if (row) { openWord(row.dataset.open); return; }
+    if (row) { state.editing = ""; openWord(row.dataset.open); return; }
     const mark = e.target.closest("[data-mark]");
     if (mark) {
       const s = stat(mark.dataset.w);
@@ -547,6 +635,39 @@ function wire() {
       saveStats();
       openWord(mark.dataset.w, false);
       toast(mark.dataset.mark === "known" ? "已记为掌握" : "已记为未掌握");
+      return;
+    }
+    const edit = e.target.closest("[data-edit]");
+    if (edit) { state.editing = edit.dataset.w; openWord(edit.dataset.w, false); return; }
+    const tone = e.target.closest("[data-settone]");
+    if (tone) {
+      // 先收下表单里已输入的内容，再改褒贬，避免切换时丢掉刚打的字
+      const fields = collectNoteForm();
+      fields.tone = tone.dataset.settone;
+      saveNote(tone.dataset.w, fields);
+      state.editing = tone.dataset.w;
+      openWord(tone.dataset.w, false);
+      return;
+    }
+    const save = e.target.closest("[data-savenote]");
+    if (save) {
+      saveNote(save.dataset.w, collectNoteForm());
+      state.editing = "";
+      openWord(save.dataset.w, false);
+      toast("补充已保存（仅本机）");
+      return;
+    }
+    if (e.target.closest("[data-cancelnote]")) {
+      state.editing = "";
+      renderResults();
+      return;
+    }
+    const drop = e.target.closest("[data-clearnote]");
+    if (drop) {
+      clearNote(drop.dataset.w);
+      state.editing = "";
+      openWord(drop.dataset.w, false);
+      toast("已删除我的补充");
     }
   });
   $("btn-update").addEventListener("click", () => checkUpdate(true));
