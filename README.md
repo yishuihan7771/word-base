@@ -72,29 +72,32 @@ python -m http.server 8787
 没有 `def` 的词条会被应用标为「待补释义」。加词就是往 `words` 数组里追加一条，然后改 `version`
 （`日期.序号`）——客户端下次打开就会拉取新版本。`abbr` 是拼音首字母，用来支持快速检索。
 
-当前 328 条：12 条手工整理的高频成语（字段齐全）+ 316 条从真题选项采集（174 条带解析原文释义，
-其余待补）。
+当前 328 条：12 条手工整理的高频成语（字段齐全）+ 316 条从真题选项采集。
+314 条有释义（185 条来自真题解析、129 条来自汉典）、303 条有拼音和首字母，
+词性/褒贬/修饰对象/主语这几个字段多数为空——可用的来源（真题解析、汉典）都不提供它们，
+需要时在详情页的「补充说明」里手写。
 
 ## 从真题收词
 
-[milanote/collect-exam-words.py](milanote/collect-exam-words.py) 读一份粉笔练习页的浏览器存档，
-把**选项里的词**全部收下来、去重，并把解析原文里的释义、搭配提示、真题出处一并结构化：
+[tools/collect-exam-words.py](tools/collect-exam-words.py) 读一份粉笔练习页的浏览器存档，
+把**选项里的词**全部收下来、去重，并把解析原文里的释义、考点、真题出处一并结构化：
 
 ```bash
-cd milanote
-python collect-exam-words.py "专项智能练习（逻辑填空）10.15.html" \
-    -o out-exam/collected.json --report out-exam/review.md --merge ../words.json
+python tools/collect-exam-words.py "专项智能练习（逻辑填空）10.15.html" \
+    --report out/review.md --json out/collected.json
+python tools/collect-exam-words.py "专项智能练习（逻辑填空）10.15.html" --merge words.json
 ```
 
-- `out-exam/collected.json` — 原始收获：40 道题的题干、四个选项、正确答案、你的答案、考点、真题来源，以及每个词的全部出现记录。
-- `out-exam/review.md` — 人工复核表：词 / 释义（解析原文）/ 常形容 / 褒贬 / 出现次数 / 是否正确答案 / 你有没有选错 / 真题出处。
-- `--merge` 只追加库里没有的词；已有的词只补 `source`/`seen`/`hit`，绝不覆盖手工写的释义。合并前会自动留一份 `words.before-merge.json`。
-- `python check-exam-words.py` 复核采集质量（释义里是否混入了解题推理、有没有跑飞的超长释义）。
+- `review.md` — 人工复核表：词 / 释义（解析原文）/ 出现次数 / 是否正确答案 / 真题出处。
+- `collected.json` — 原始收获：每题题干、四个选项、正确答案、你的答案、考点、真题来源，以及每个词的全部出现记录。
+- `--merge` 只追加库里没有的词，已有的跳过，绝不覆盖手写内容；没有新词时词库与版本号都不动。
+- 库里仍缺释义/拼音的，接着跑 [tools/fetch-han-dian.py](tools/fetch-han-dian.py)。
 
 ## 数据存放与备份
 
-查询次数、掌握情况、收录与重复计数都存在浏览器的 `localStorage`（键 `kg.db.v1` / `kg.stats.v1` / `kg.local.v1`），换设备不会同步。
-「数据」页可以导出统计 JSON，也可以把导出的文件再导回来合并；从试卷分析里新收的「待补释义」词会一并带出，方便你补全后合并进 `words.json`。
+查询次数、掌握情况、重复计数、以及详情页里手写的补充说明都存在浏览器的 `localStorage`
+（键 `kg.db.v1` / `kg.stats.v1` / `kg.notes.v1`），换设备不会同步。
+「数据」页可以导出统计 JSON（含补充说明），也可以导回来合并。
 
 ## 仓库结构
 
@@ -102,23 +105,18 @@ python collect-exam-words.py "专项智能练习（逻辑填空）10.15.html" \
 index.html                网页应用（单文件，无依赖）
 words.json                公开词库（版本号驱动更新）
 PLAN.md                   开发计划（从 Milanote 看板提取）
-milanote/                 工具链，见 milanote/README.md
-  milanote-dump.mjs       走 API 在线抓看板 → JSON / Markdown / Canvas
-  parse-saved-html.py     从浏览器存档离线还原看板
-  collect-exam-words.py   从练习页存档采集选项词 → 结构化词库
-  check-exam-words.py     采集质量复核
-  test-page-logic.mjs     网页逻辑测试（桩化 DOM，21 项）
-  check-page.py           网页静态检查（脚本语法 / 词库字段 / 结构 / id 引用）
-  out-exam/               10.15 这套题的全部产物
+tools/                    工具链，见 tools/README.md
+  check-page.py           静态检查（脚本语法 / 词库 schema / 结构 / id 引用）
+  test-page-logic.mjs     行为测试（桩化 DOM 跑真逻辑，30 项断言）
+  collect-exam-words.py   练习页存档 → 选项词与解析释义
+  fetch-han-dian.py       汉典 → 补释义与拼音
 ```
 
 ## 验证
 
 ```bash
-cd milanote
-node test-page-logic.mjs      # 搜索排序、拼音检索、重复计数、刷词标记、file:// 分支
-python check-page.py          # 内联脚本语法、词库字段完整性、HTML 结构与 id 引用
-python check-exam-words.py    # 采集到的释义是否干净
+python tools/check-page.py        # 静态检查
+node   tools/test-page-logic.mjs  # 行为测试
 ```
 
-三个脚本都要以「无 FAIL / all checks passed」结束才算通过。
+两个都要以「all checks passed」结束才算通过。改了 `index.html` 或 `words.json` 之后各跑一遍。
