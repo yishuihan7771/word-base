@@ -34,6 +34,18 @@ python tools/check-page.py && node tools/test-page-logic.mjs
 采集脚本只认解析里**明确写了释义**的句子（`X项“词”指…`）；只讲怎么排除选项、没有下定义的，
 一律留空标「待补释义」，不硬编。汉典拿不到的（多为「丰富性」「随意性」这类非成语）同样留空。
 
+## 图标与全屏
+
+`index.html` 通过 `manifest.json`（`display: fullscreen`）与 `apple-mobile-web-app-capable`
+支持「添加到主屏幕」后以全屏运行，手机上没有地址栏、不会误点跳走，下拉也不刷新页面。
+
+```bash
+python tools/make-icons.py     # 需要 Pillow；改配色/字样后重跑生成三个图标
+```
+
+`tools/check-page.py` 会顺带校验：manifest 的 `display` 必须是 `fullscreen`、声明了 `start_url`、
+每个图标在磁盘上存在且尺寸与声明一致。
+
 ## 字段来源
 
 词库每条都带 `src` 标明释义出处，便于复核：

@@ -31,6 +31,11 @@ python -m http.server 8787
 
 直接双击 `index.html` 也能用，只是首次需要手动导入一次词库（「数据」页 → 导入词库文件）。
 
+**手机建议装成全屏应用**：在手机浏览器打开站点 → 菜单选「添加到主屏幕」，之后从桌面图标打开就是全屏——
+没有地址栏和标签栏（不会误点跳走），下拉也不会刷新页面。安卓 Chrome 走 `manifest.json` 的
+`display: fullscreen`；iPhone Safari 走 `apple-mobile-web-app-capable`。临时用一次全屏可以点右上角「全屏」按钮
+（iOS Safari 不支持网页全屏，只能走添加主屏幕）。
+
 发布到 GitHub Pages（对应你计划里的「github 上设置一个公开访问的看板库」）：
 
 1. 把仓库推到 GitHub。
@@ -104,12 +109,17 @@ python tools/collect-exam-words.py "专项智能练习（逻辑填空）10.15.ht
 ```
 index.html                网页应用（单文件，无依赖）
 words.json                公开词库（版本号驱动更新）
+manifest.json             全屏清单（添加到主屏幕后无浏览器界面）
+icon-192.png              主屏幕图标
+icon-512.png
+icon-maskable-512.png     自适应图标（安卓圆形/方形裁切）
 PLAN.md                   开发计划（从 Milanote 看板提取）
 tools/                    工具链，见 tools/README.md
-  check-page.py           静态检查（脚本语法 / 词库 schema / 结构 / id 引用）
-  test-page-logic.mjs     行为测试（桩化 DOM 跑真逻辑，30 项断言）
+  check-page.py           静态检查（脚本语法 / 词库 schema / 结构 / id 引用 / manifest 与图标）
+  test-page-logic.mjs     行为测试（桩化 DOM 跑真逻辑，36 项断言）
   collect-exam-words.py   练习页存档 → 选项词与解析释义
   fetch-han-dian.py       汉典 → 补释义与拼音
+  make-icons.py           重生成 PWA 图标
 ```
 
 ## 验证

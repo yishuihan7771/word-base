@@ -41,9 +41,43 @@ if re.search(r"function clearLocalData[\s\S]{0,700}K_LEGACY_LOCAL", page) is Non
 
 # 3. 关键功能必须在位
 for need in ['id="btn-clear-all"', "function clearLocalData", "localStorage.removeItem",
-             "K_LEGACY_LOCAL", "kg.notes.v1", "function saveNote", "data-edit"]:
+             "K_LEGACY_LOCAL", "kg.notes.v1", "function saveNote", "data-edit",
+             'id="btn-fullscreen"', "function toggleFullscreen", "function syncFullscreenButton",
+             'rel="manifest"', "apple-mobile-web-app-capable", "overscroll-behavior"]:
     if need not in page:
         problems.append(f"missing {need!r}")
+
+# 3b. 全屏清单与图标：装到主屏幕后要能真正全屏
+manifest_path = ROOT / "manifest.json"
+if not manifest_path.exists():
+    problems.append("manifest.json missing")
+elif 'rel="manifest"' not in page or "manifest.json" not in page:
+    problems.append("index.html does not link manifest.json")
+else:
+    mf = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if mf.get("display") != "fullscreen":
+        problems.append(f"manifest display is {mf.get('display')!r}, expected 'fullscreen'")
+    if not mf.get("start_url"):
+        problems.append("manifest has no start_url")
+    icons = mf.get("icons") or []
+    if not icons:
+        problems.append("manifest declares no icons")
+    try:
+        from PIL import Image
+        have_pillow = True
+    except ImportError:
+        have_pillow = False
+    for icon in icons:
+        icon_path = ROOT / icon.get("src", "")
+        if not icon_path.exists():
+            problems.append(f"manifest icon missing on disk: {icon.get('src')}")
+            continue
+        want = icon.get("sizes", "")
+        if have_pillow and "x" in want:
+            with Image.open(icon_path) as im:
+                expected = tuple(int(x) for x in want.split("x")[:2])
+                if im.size != expected:
+                    problems.append(f"{icon['src']}: is {im.size}, manifest says {want}")
 
 # 4. 每个 $("id") 都要有对应元素；每个按钮都要接上线
 ids = set(re.findall(r'\bid="([^"]+)"', page))

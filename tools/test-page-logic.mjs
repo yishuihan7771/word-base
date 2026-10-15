@@ -33,19 +33,30 @@ function makeEl(id = "") {
 }
 
 let fileText = wordsText;
-function boot({ protocol = "http:", failFetch = false, persist = new Map(), touch = false } = {}) {
+let fsCalls = 0;   // documentElement.requestFullscreen 调用次数
+function boot({ protocol = "http:", failFetch = false, persist = new Map(), touch = false,
+                standalone = false, noFullscreen = false } = {}) {
   const els = new Map();
   const store = persist;
   let fetchCalls = 0;
+  const documentElement = noFullscreen ? {} : {
+    requestFullscreen() { fsCalls++; return Promise.resolve(); },
+  };
   const context = {
     console, setTimeout, clearTimeout, Date, Math, JSON, Object, Array, String, Number, Boolean, RegExp, Error, Promise,
     confirm: () => true,
     location: { protocol, href: protocol === "file:" ? "file:///index.html" : "http://127.0.0.1/" },
     window: {
       scrollTo() {},
-      matchMedia: (q) => ({ matches: !touch && /pointer:\s*fine/.test(q) }),
+      navigator: { standalone },
+      matchMedia: (q) => ({
+        matches: (/pointer:\s*fine/.test(q) && !touch) || (/display-mode/.test(q) && standalone),
+      }),
     },
     document: {
+      documentElement,
+      fullscreenElement: null,
+      exitFullscreen() { return Promise.resolve(); },
       getElementById(id) { if (!els.has(id)) els.set(id, makeEl(id)); return els.get(id); },
       querySelectorAll: () => [], addEventListener() {}, createElement: () => makeEl(),
     },
@@ -65,7 +76,7 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   context.globalThis = context;
   vm.createContext(context);
   vm.runInContext(script, context, { filename: "index.html" });
-  return { context, store, fetchCalls: () => fetchCalls, html: (id) => els.get(id)?.innerHTML ?? "" };
+  return { context, els, store, fetchCalls: () => fetchCalls, html: (id) => els.get(id)?.innerHTML ?? "" };
 }
 
 // ---------------------------------------------------------------- 正常使用
@@ -182,6 +193,32 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   await b.context.clearLocalData();
   check("清除本机数据也清掉补充说明", b.store.has("kg.notes.v1"), false);
   check("清除后详情页不再显示补充", /常考否定句/.test(b.context.detailHtml(wordsJson.words.find((w) => w.w === "一蹴而就"))), false);
+}
+
+// ---------------------------------------------------------------- 全屏与防误触
+{
+  fsCalls = 0;
+  const b = boot({ protocol: "http:" });
+  b.context.toggleFullscreen();
+  // 同步断言：启动时的 checkUpdate 是异步的，等一拍会被它的「词库已载入」提示覆盖
+  check("支持全屏时点按钮会请求全屏", fsCalls, 1);
+  check("全屏按钮显示为「全屏」", b.els.get("btn-fullscreen").textContent, "全屏");
+  check("非全屏状态下按钮可见", b.els.get("btn-fullscreen").hidden, false);
+
+  // 模拟已经进入全屏：按钮要变成「退出全屏」
+  b.context.document.fullscreenElement = b.context.document.documentElement;
+  b.context.syncFullscreenButton();
+  check("全屏后按钮变「退出全屏」", b.els.get("btn-fullscreen").textContent, "退出全屏");
+
+  // 已装成主屏幕应用：不该再显示全屏按钮
+  const standalone = boot({ protocol: "http:", standalone: true });
+  check("从主屏幕打开时不显示全屏按钮", standalone.els.get("btn-fullscreen").hidden, true);
+
+  // 浏览器不支持全屏（iOS Safari）：隐藏按钮，点了给提示
+  const unsupported = boot({ protocol: "http:", noFullscreen: true });
+  check("不支持全屏时隐藏按钮", unsupported.els.get("btn-fullscreen").hidden, true);
+  unsupported.context.toggleFullscreen();
+  check("不支持全屏时给出「添加到主屏幕」提示", /添加到主屏幕/.test(unsupported.els.get("toast").textContent), true);
 }
 
 console.log(`\n${failures ? failures + " FAILURE(S)" : "all checks passed"}`);

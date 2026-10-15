@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+<!-- 添加到主屏幕后以全屏运行：安卓走 manifest 的 display:fullscreen，iOS 认下面这几个 apple-* -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="词语积累">
 <title>考公词语积累器</title>
 <style>
   :root{
@@ -21,10 +28,19 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
+  /* 手机上防误触：关掉下拉刷新/滚动链，去掉双击缩放和点击高亮 */
+  html,body{overscroll-behavior:none}
+  button,nav.tabs button,.result,.drill .flip,label{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  header,nav.tabs,button,.word-head,.counter,.tag{-webkit-user-select:none;user-select:none}
+  dl.detail dd,input,textarea{-webkit-user-select:text;user-select:text}
   body{
     background:var(--bg); color:var(--fg); min-height:100vh;
     font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
     -webkit-text-size-adjust:100%;
+  }
+  @media (display-mode: fullscreen), (display-mode: standalone){
+    /* 已经装成全屏应用时，顶部留出状态栏高度 */
+    .wrap{padding-top:env(safe-area-inset-top)}
   }
   .wrap{max-width:860px;margin:0 auto;padding:0 16px calc(40px + env(safe-area-inset-bottom))}
   header{padding:20px 0 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between}
@@ -102,6 +118,7 @@
     <div class="meta">
       <span class="chip" id="ver">词库 —</span>
       <span class="chip" id="cnt">0 词</span>
+      <button id="btn-fullscreen" class="ghost">全屏</button>
       <button id="btn-update" class="ghost">检查更新</button>
     </div>
   </header>
@@ -172,6 +189,15 @@
           <button id="btn-import-file" class="primary">选择 words.json 导入</button>
           <input type="file" id="file-input" accept=".json,application/json" hidden>
         </div>
+      </div>
+      <div class="card">
+        <strong>装成全屏应用（手机防误触）</strong>
+        <p class="hint">
+          在手机浏览器里打开本站 → 菜单里选<strong>「添加到主屏幕」</strong>，之后从桌面图标打开就是<strong>全屏</strong>：
+          没有地址栏和标签栏，不会误点跳走，下拉也不会刷新页面。<br>
+          安卓 Chrome：右上角 ⋮ → 添加到主屏幕；iPhone Safari：底部分享 ↑ → 添加到主屏幕。<br>
+          临时用一次全屏，点右上角「全屏」按钮（iOS Safari 不支持，只能走上面的方法）。
+        </p>
       </div>
       <div class="card">
         <strong>备份与清理</strong>
@@ -590,6 +616,42 @@ function toast(msg) {
 
 function renderAll() { renderResults(); renderStats(); buildDrillList(); }
 
+// ---------------------------------------------------------------- 全屏 / 防误触
+
+// 已经是「添加到主屏幕」打开的全屏应用，就不需要再点全屏了
+function isStandalone() {
+  try {
+    if (window.navigator && window.navigator.standalone === true) return true;
+    return !!(window.matchMedia && window.matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches);
+  } catch { return false; }
+}
+const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+
+function toggleFullscreen() {
+  const el = document.documentElement;
+  if (fullscreenElement()) {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exit) Promise.resolve(exit.call(document)).catch(() => {});
+    return;
+  }
+  const request = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!request) {
+    toast("这台设备不支持网页全屏；用「添加到主屏幕」打开即为全屏");
+    return;
+  }
+  Promise.resolve(request.call(el)).catch(() => toast("全屏被浏览器拒绝；用「添加到主屏幕」打开更稳"));
+}
+
+// 全屏按钮只在有用的时候出现：已全屏、或浏览器不支持，就隐藏
+function syncFullscreenButton() {
+  const btn = $("btn-fullscreen");
+  if (!btn) return;
+  const el = document.documentElement;
+  const supported = !!(el.requestFullscreen || el.webkitRequestFullscreen);
+  btn.hidden = isStandalone() || !supported;
+  btn.textContent = fullscreenElement() ? "退出全屏" : "全屏";
+}
+
 // 读取补充表单里当前填写的内容（未保存的输入也要收下）
 function collectNoteForm() {
   const out = {};
@@ -671,6 +733,9 @@ function wire() {
     }
   });
   $("btn-update").addEventListener("click", () => checkUpdate(true));
+  $("btn-fullscreen").addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", syncFullscreenButton);
+  document.addEventListener("webkitfullscreenchange", syncFullscreenButton);
   $("btn-import-file").addEventListener("click", () => $("file-input").click());
   $("file-input").addEventListener("change", (e) => { if (e.target.files[0]) readFile(e.target.files[0]); e.target.value = ""; });
   $("btn-export").addEventListener("click", exportJson);
@@ -709,6 +774,7 @@ loadStore();
 wire();
 renderMeta(false);
 renderAll();
+syncFullscreenButton();
 checkUpdate(false);
 </script>
 </body>
