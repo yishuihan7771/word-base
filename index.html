@@ -304,12 +304,15 @@ function renderMeta(note) {
   if (note) $("ver").classList.toggle("stale", !!note);
   const inUse = Object.values(state.stats).filter((s) => s.q || s.known || s.unknown || s.collected).length;
   const notes = Object.keys(state.notes).length;
+  const sw = { registered: "已注册", failed: "注册失败", skipped: "file:// 下不注册", unsupported: "浏览器不支持" }[swState] || "未注册";
   $("db-status").innerHTML =
     "版本：<strong>" + esc(state.db.version) + "</strong>" +
     (state.db.updated ? "（" + esc(state.db.updated) + "）" : "") + "<br>" +
     "词条：" + state.db.words.length + " 条<br>" +
     "本机有记录的词：" + inUse + " 条<br>" +
     "我补充过的词：" + notes + " 条<br>" +
+    "安装状态：" + esc(installStatusText()) + "<br>" +
+    "service worker：" + esc(sw) + "<br>" +
     "数据存放：这台设备的浏览器 localStorage，不会同步到别的设备";
 }
 
@@ -658,7 +661,11 @@ function syncFullscreenButton() {
 
 // 安卓 Chrome 会发 beforeinstallprompt，抓住它就能一键唤起系统安装框；
 // iPhone Safari 没有这个事件，也没有任何 API 能触发安装，只能提示走「分享 → 添加到主屏幕」。
+//
+// 按钮策略：只要还没装、也没被取消过，就一直显示。这样在「拿不到安装事件的浏览器」上点了也有明确反应
+// （给出该浏览器的菜单路径），而不是毫无动静。
 let installEvent = null;
+let swState = "";   // registered / failed / skipped / unsupported
 
 function isIOS() {
   const ua = (window.navigator && window.navigator.userAgent) || "";
@@ -674,8 +681,7 @@ function markInstallDismissed() {
 function syncInstallButton() {
   const btn = $("btn-install");
   if (!btn) return;
-  const usable = !!installEvent || isIOS();
-  btn.hidden = isStandalone() || installDismissed() || !usable;
+  btn.hidden = isStandalone() || installDismissed();
 }
 
 function startInstall() {
@@ -690,7 +696,7 @@ function startInstall() {
         if (choice.outcome === "accepted") toast("已添加到桌面");
         else { markInstallDismissed(); toast("已取消；以后可从浏览器菜单里添加"); }
       })
-      .catch(() => {})
+      .catch(() => toast("安装框没能弹出；用浏览器菜单里的「添加到主屏幕」"))
       .then(syncInstallButton);
     return;
   }
@@ -698,14 +704,25 @@ function startInstall() {
     toast("iPhone：点底部「分享」↑ → 添加到主屏幕");
     return;
   }
-  toast("这个浏览器不支持一键添加；用浏览器菜单里的「添加到主屏幕」");
+  toast("这个浏览器没给安装接口：请点浏览器菜单（⋮ 或 ≡）→「添加到主屏幕」/「安装应用」");
 }
 
 // service worker 只为满足可安装条件；注册失败不影响使用，也绝不缓存内容
 function registerServiceWorker() {
-  if (location.protocol === "file:") return;
-  if (!("serviceWorker" in window.navigator)) return;
-  Promise.resolve(window.navigator.serviceWorker.register("sw.js")).catch(() => {});
+  if (location.protocol === "file:") { swState = "skipped"; return; }
+  if (!("serviceWorker" in window.navigator)) { swState = "unsupported"; return; }
+  Promise.resolve(window.navigator.serviceWorker.register("sw.js"))
+    .then(() => { swState = "registered"; renderMeta(false); })
+    .catch(() => { swState = "failed"; renderMeta(false); });
+}
+
+// 装不上时用户至少能读到状态，方便排查
+function installStatusText() {
+  if (isStandalone()) return "已装成桌面应用（全屏运行中）";
+  const how = installEvent ? "本浏览器支持一键安装，点右上角按钮即可"
+    : isIOS() ? "iPhone 需手动：分享 ↑ → 添加到主屏幕"
+      : "本浏览器未提供安装接口，请用浏览器菜单里的「添加到主屏幕」";
+  return "未安装 · " + how;
 }
 
 function wireInstallEvents() {

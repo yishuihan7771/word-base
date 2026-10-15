@@ -240,7 +240,8 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   // 用 failFetch 起，避免启动时的「词库已载入」提示覆盖掉安装提示（那是异步的）
   promptCalls = 0;
   const android = boot({ protocol: "http:", failFetch: true });
-  check("没拿到安装事件前按钮是隐藏的", android.els.get("btn-install").hidden, true);
+  // 按钮不等安装事件就要出现：某些浏览器永远不发这个事件，按钮藏起来就变成「点了没反应」
+  check("未安装时按钮即可见", android.els.get("btn-install").hidden, false);
 
   let prevented = false;
   android.fire("beforeinstallprompt", {
@@ -249,12 +250,17 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
     userChoice: Promise.resolve({ outcome: "accepted" }),
   });
   check("捕获安装事件时阻止浏览器自动弹框", prevented, true);
-  check("拿到安装事件后按钮出现", android.els.get("btn-install").hidden, false);
+  check("拿到安装事件后按钮仍可见", android.els.get("btn-install").hidden, false);
 
   android.context.startInstall();
   check("点按钮会唤起安装框一次", promptCalls, 1);
   await new Promise((r) => setTimeout(r, 0));
   check("接受安装后提示已添加", /已添加/.test(android.els.get("toast").textContent), true);
+
+  // 没有安装事件（多数国产浏览器 / 微信内打开）：按钮仍要给出可操作的指路
+  const noEvent = boot({ protocol: "http:", failFetch: true });
+  noEvent.context.startInstall();
+  check("没有安装事件时提示改用浏览器菜单", /添加到主屏幕/.test(noEvent.els.get("toast").textContent), true);
 
   // 用户在系统框里取消：记下来，不再反复打扰
   const declineStore = new Map();
@@ -280,10 +286,11 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   const installed = boot({ protocol: "http:", failFetch: true, standalone: true });
   check("已装成桌面应用时隐藏安装按钮", installed.els.get("btn-install").hidden, true);
 
-  // 其他浏览器既不支持也不给事件：按钮隐藏，点了有兜底提示
-  const other = boot({ protocol: "http:", failFetch: true });
-  other.context.startInstall();
-  check("不支持时提示用浏览器菜单", /浏览器菜单/.test(other.els.get("toast").textContent), true);
+  // 数据页要能读到自检信息，装不上时便于排查
+  const diag = boot({ protocol: "http:", failFetch: true });
+  diag.context.renderMeta(false);
+  check("状态里显示安装情况", /安装状态/.test(diag.html("db-status")), true);
+  check("状态里显示 service worker 情况", /service worker/.test(diag.html("db-status")), true);
 
   // service worker：http 下注册一次；注册失败不影响页面；file:// 下不注册
   swCalls = 0;
@@ -291,11 +298,13 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   await new Promise((r) => setTimeout(r, 0));
   check("http 下注册 service worker", swCalls, 1);
   check("注册后页面照常可用", swOk.els.get("ver").textContent.startsWith("词库"), true);
+  check("注册成功后状态显示已注册", /已注册/.test(swOk.html("db-status")), true);
 
   swCalls = 0;
   const swFail = boot({ protocol: "http:", failFetch: true, swThrows: true });
   await new Promise((r) => setTimeout(r, 0));
   check("service worker 注册失败也不中断脚本", swCalls, 1);
+  check("注册失败时状态如实显示", /注册失败/.test(swFail.html("db-status")), true);
 
   swCalls = 0;
   boot({ protocol: "file:", failFetch: true });
