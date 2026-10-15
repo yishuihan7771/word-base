@@ -512,10 +512,19 @@ function toast(msg) {
 
 function renderAll() { renderResults(); renderStats(); buildDrillList(); }
 
+// A real pointer (mouse/trackpad) means a keyboard is already there and focusing the box is
+// helpful. On a touch screen focusing it would pop the soft keyboard the moment a tab is tapped,
+// so the user has to dismiss it before doing anything.
+function hasHardwareKeyboard() {
+  try {
+    return !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+  } catch { return false; }
+}
+
 function switchTab(name) {
   for (const b of document.querySelectorAll("nav.tabs button")) b.setAttribute("aria-selected", String(b.dataset.tab === name));
   for (const s of document.querySelectorAll("main > section")) s.hidden = s.id !== "tab-" + name;
-  if (name === "search") $("q").focus();
+  if (name === "search" && hasHardwareKeyboard()) $("q").focus();
   if (name === "drill") buildDrillList();
 }
 
