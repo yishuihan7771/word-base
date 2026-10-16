@@ -433,5 +433,66 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   check("计时中切换模式会被拦住", /先结束本轮/.test(q2.text("toast")), true);
 }
 
+// ---------------------------------------------------------------- 计时：模式按钮与三个数字联动
+{
+  // 模式按钮要有明确的选中状态（data-on），并且切换时跟着变
+  const m = boot({ protocol: "http:", failFetch: true });
+  check("默认是模式一且按钮标为选中", [m.els.get("tm-mode-range").dataset.on, m.els.get("tm-mode-perq").dataset.on], ["true", "false"]);
+  m.context.tmSetMode("perq");
+  check("切到模式二后选中状态跟着变", [m.els.get("tm-mode-range").dataset.on, m.els.get("tm-mode-perq").dataset.on], ["false", "true"]);
+  check("切到模式二后提示文案也变了", /只填题量和每题间隔/.test(m.text("tm-mode-hint")), true);
+  check("模式二下总时间输入框隐藏", m.els.get("tm-range-only").hidden, true);
+  check("模式二下显示算出来的总时间", m.els.get("tm-total-hint").hidden, false);
+  m.context.tmSetMode("range");
+  check("切回模式一后总时间输入框恢复", m.els.get("tm-range-only").hidden, false);
+  check("模式一下不显示总时间结果", m.els.get("tm-total-hint").hidden, true);
+
+  // 区间模式：改总时间 → 每题跟着变
+  const g = boot({ protocol: "http:", failFetch: true });
+  g.els.get("tm-n").value = "20";
+  g.els.get("tm-minutes").value = "20";
+  g.context.tmSyncFromInputs("minutes");
+  check("20 题 / 20 分钟 → 每题 60 秒", g.els.get("tm-perq").value, "60");
+  g.els.get("tm-minutes").value = "10";
+  g.context.tmSyncFromInputs("minutes");
+  check("总时间改成 10 分钟 → 每题变 30 秒", g.els.get("tm-perq").value, "30");
+
+  // 区间模式：改每题 → 总时间跟着变
+  g.els.get("tm-perq").value = "45";
+  g.context.tmSyncFromInputs("perq");
+  check("每题改成 45 秒 → 总时间变 15 分钟", g.els.get("tm-minutes").value, "15");
+
+  // 区间模式：改题量 → 每题跟着变（以总时间为锚）
+  g.els.get("tm-n").value = "10";
+  g.context.tmSyncFromInputs("n");
+  check("题量改成 10 → 每题变 90 秒", g.els.get("tm-perq").value, "90");
+  check("题量改成 10 时总时间不动", g.els.get("tm-minutes").value, "15");
+
+  // 正在输入的那个框不能被回填冲掉（否则「先清空再输入」会被打断）
+  g.els.get("tm-minutes").value = "";
+  g.context.tmSyncFromInputs("minutes");
+  check("清空总时间框时不会把值硬塞回去", g.els.get("tm-minutes").value, "");
+  g.els.get("tm-minutes").value = "12";
+  g.context.tmSyncFromInputs("minutes");
+  check("继续输入后每题重新算", g.els.get("tm-perq").value, "72");
+
+  // 分题模式：只输入题量和每题，总时间算出来；改题量不该改每题
+  const s = boot({ protocol: "http:", failFetch: true });
+  s.context.tmSetMode("perq");
+  s.els.get("tm-n").value = "20";
+  s.els.get("tm-perq").value = "30";
+  s.context.tmSyncFromInputs("perq");
+  check("分题模式显示总时间", s.text("tm-total-text"), "10:00（20 题 × 30 秒）");
+  s.els.get("tm-n").value = "40";
+  s.context.tmSyncFromInputs("n");
+  check("分题模式改题量不会改每题", s.els.get("tm-perq").value, "30");
+  check("分题模式改题量后总时间跟着变", s.text("tm-total-text"), "20:00（40 题 × 30 秒）");
+
+  // 每 200ms 的重绘不能覆盖输入框
+  s.els.get("tm-perq").value = "35";
+  s.context.renderTimer();
+  check("重绘不会给输入框回填旧值", s.els.get("tm-perq").value, "35");
+}
+
 console.log(`\n${failures ? failures + " FAILURE(S)" : "all checks passed"}`);
 process.exit(failures ? 1 : 0);

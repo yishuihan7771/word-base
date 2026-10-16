@@ -104,6 +104,11 @@
     border:1px solid var(--line);border-radius:10px;padding:9px 12px;outline:none;
   }
   .field input:focus{border-color:var(--accent)}
+  /* 选中的模式按钮：靠 data-on 驱动，切换时由脚本改写（class 不能写死在 HTML 里） */
+  #tm-mode-range,#tm-mode-perq{opacity:.55}
+  #tm-mode-range[data-on="true"],#tm-mode-perq[data-on="true"]{
+    opacity:1;background:var(--accent);color:var(--accent-fg);border-color:transparent;
+  }
   .tm-big{
     font-size:66px;font-weight:800;line-height:1.05;letter-spacing:1px;
     font-variant-numeric:tabular-nums;word-break:keep-all;
@@ -213,8 +218,8 @@
           <span class="counter" id="tm-phase">未开始</span>
         </div>
         <div class="row" style="margin-top:10px">
-          <button data-mode="range" class="primary">模式一 · 区间计时</button>
-          <button data-mode="perq" class="ghost">模式二 · 分题计时</button>
+          <button id="tm-mode-range" data-mode="range" data-on="true">模式一 · 区间计时</button>
+          <button id="tm-mode-perq" data-mode="perq" data-on="false">模式二 · 分题计时</button>
         </div>
         <p class="hint" id="tm-mode-hint"></p>
 
@@ -223,10 +228,14 @@
             <input type="number" id="tm-n" min="1" max="300" step="1" inputmode="numeric" value="20">
           </label>
           <label class="field" id="tm-range-only">总时间（分钟）
-            <input type="number" id="tm-minutes" min="1" max="600" step="1" inputmode="numeric" value="20">
+            <input type="number" id="tm-minutes" min="0.5" max="600" step="1" inputmode="decimal" value="20">
           </label>
-          <label class="field" id="tm-perq-only">每题间隔（秒）
-            <input type="number" id="tm-perq" min="5" max="900" step="5" inputmode="numeric" value="50">
+          <!-- 分题模式不输入总时间，只显示算出来的结果 -->
+          <span class="field" id="tm-total-hint" hidden>总时间
+            <span id="tm-total-text" style="font-size:19px;color:var(--fg)">—</span>
+          </span>
+          <label class="field">每题间隔（秒）
+            <input type="number" id="tm-perq" min="5" max="900" step="1" inputmode="numeric" value="60">
           </label>
         </div>
         <p class="hint" id="tm-avg-hint"></p>
@@ -328,7 +337,7 @@ const state = {
   tm: {
     mode: "range",       // range=区间计时（总时间均分） / perq=分题计时（每题倒计时）
     phase: "idle",       // idle / running / paused / waiting（一道题时间到，等点下一题） / done
-    n: 20, minutes: 20, perq: 50,
+    n: 20, minutes: 20, perq: 60,   // 三者默认自洽：20 分钟 ÷ 20 题 = 每题 60 秒
     t0: 0,               // 本轮开始的时间戳
     pausedMs: 0,         // 累计暂停时长
     pausedAt: 0,
@@ -789,19 +798,51 @@ function tmStopTicker() {
   if (tmTicker) { clearInterval(tmTicker); tmTicker = null; }
 }
 
-// 读设置
-function tmReadSettings() {
-  const clamp = (v, lo, hi, fallback) => {
-    const num = parseInt(v, 10);
-    return Number.isFinite(num) ? Math.min(hi, Math.max(lo, num)) : fallback;
-  };
-  state.tm.n = clamp($("tm-n").value, 1, 300, 20);
-  state.tm.minutes = clamp($("tm-minutes").value, 1, 600, 20);
-  state.tm.perq = clamp($("tm-perq").value, 5, 900, 50);
-  $("tm-n").value = state.tm.n;
-  $("tm-minutes").value = state.tm.minutes;
-  $("tm-perq").value = state.tm.perq;
+// 设置的三个数字是联动的：
+//   区间模式：题量 / 总时间 / 每题间隔，改哪个就以哪个为准，另一个自动算出来
+//             （改总时间或题量 → 重算每题；改每题 → 重算总时间）
+//   分题模式：只输入题量和每题间隔，总时间由「题量 × 每题」算出来展示，不可输入
+// 参数 edited 指明用户刚动的是哪个字段，这样推导方向才不会来回打架。
+const tmNum = (v, lo, hi, fallback) => {
+  const num = parseFloat(v);
+  return Number.isFinite(num) ? Math.min(hi, Math.max(lo, num)) : fallback;
+};
+const tmRound = (x, digits) => {
+  const p = Math.pow(10, digits);
+  return Math.round(x * p) / p;
+};
+// 45 → "45"，42.9 → "42.9"，整数后面不拖小数点
+const tmShow = (x) => String(tmRound(x, 1));
+const tmMins = (sec) => {
+  const m = Math.floor(sec / 60);
+  const s = Math.round(sec % 60);
+  return m + ":" + String(s).padStart(2, "0");
+};
+
+function tmSyncFromInputs(edited) {
+  const t = state.tm;
+  // 分题模式总时间不可输入，一律以「每题」为锚；区间模式则以用户最后改的那个为准
+  const perqAnchor = t.mode === "perq" || edited === "perq";
+  t.n = Math.round(tmNum($("tm-n").value, 1, 300, t.n));
+  if (perqAnchor) {
+    t.perq = Math.max(1, tmRound(tmNum($("tm-perq").value, 5, 900, t.perq), 1));
+    t.minutes = tmRound(t.n * t.perq / 60, 2);              // 反推总时间
+  } else {
+    t.minutes = tmRound(tmNum($("tm-minutes").value, 0.5, 600, t.minutes), 2);
+    t.perq = Math.max(1, tmRound(t.minutes * 60 / t.n, 1)); // 重算每题
+  }
+  tmPaintSettings(edited);
   saveTimer();
+  renderTimer();
+}
+
+// 回填输入框。skip 是用户正在输入的那个字段——不能覆盖它，否则「先清空再输入」会被打断；
+// 也绝不能放进 renderTimer（每 200ms 跑一次会把输入冲掉）。
+function tmPaintSettings(skip) {
+  const t = state.tm;
+  if (skip !== "n") $("tm-n").value = t.n;
+  if (skip !== "minutes") $("tm-minutes").value = tmShow(t.minutes);
+  if (skip !== "perq") $("tm-perq").value = tmShow(t.perq);
 }
 
 function tmSetMode(mode) {
@@ -810,11 +851,12 @@ function tmSetMode(mode) {
   state.tm.phase = "idle";
   state.tm.result = "";
   saveTimer();
+  tmPaintSettings();
   renderTimer();
 }
 
 function tmStart() {
-  tmReadSettings();
+  tmSyncFromInputs("");
   const t = state.tm;
   t.phase = "running";
   t.t0 = Date.now();
@@ -930,16 +972,21 @@ const tmShouldBeAt = () => {
 function renderTimer() {
   const t = state.tm;
   const running = tmRunning();
-  if ($("tm-n") && document.activeElement !== $("tm-n")) $("tm-n").value = t.n;
-  if ($("tm-minutes") && document.activeElement !== $("tm-minutes")) $("tm-minutes").value = t.minutes;
-  if ($("tm-perq") && document.activeElement !== $("tm-perq")) $("tm-perq").value = t.perq;
-
   const rangeMode = t.mode === "range";
+
+  // 模式按钮的选中状态（class 不能写死在 HTML 里，否则切了也不变）
+  $("tm-mode-range").dataset.on = String(rangeMode);
+  $("tm-mode-perq").dataset.on = String(!rangeMode);
+
   $("tm-mode-hint").textContent = rangeMode
-    ? "模式一 · 区间计时：设好题量和总时间，总时间平均分给每题，大字显示你现在应该做到第几题。"
-    : "模式二 · 分题计时：设好题量和每题间隔，每题单独倒计时；时间到会响一声并等你点「下一题」。";
+    ? "模式一 · 区间计时：题量、总时间、每题间隔三者联动——改哪个就按哪个算，另外两个自动跟着变；大字显示你现在应该做到第几题。"
+    : "模式二 · 分题计时：只填题量和每题间隔，总时间自动算出来；每题单独倒计时，时间到会响一声并等你点「下一题」。";
   $("tm-range-only").hidden = !rangeMode;
-  $("tm-perq-only").hidden = rangeMode;
+  $("tm-total-hint").hidden = rangeMode;
+  $("tm-total-text").textContent = rangeMode ? "—" : tmMins(t.n * t.perq) + "（" + t.n + " 题 × " + tmShow(t.perq) + " 秒）";
+  $("tm-avg-hint").textContent = rangeMode
+    ? "平均每题 " + tmShow(t.perq) + " 秒（" + tmShow(t.minutes) + " 分钟 ÷ " + t.n + " 题）"
+    : "共 " + t.n + " 题，每题 " + tmShow(t.perq) + " 秒，合计 " + tmMins(t.n * t.perq);
   $("tm-avg-hint").textContent = rangeMode
     ? "平均每题 " + Math.round(tmPerQuestionMs() / 1000) + " 秒（" + t.minutes + " 分钟 ÷ " + t.n + " 题）"
     : "共 " + t.n + " 题，每题 " + t.perq + " 秒";
@@ -1195,8 +1242,10 @@ function wire() {
   $("tb-pause").addEventListener("click", tmPauseToggle);
   $("tb-next").addEventListener("click", tmNextQuestion);
   $("tb-stop").addEventListener("click", tmStop);
-  for (const id of ["tm-n", "tm-minutes", "tm-perq"]) {
-    $(id).addEventListener("change", () => { if (!tmRunning()) { tmReadSettings(); renderTimer(); } });
+  for (const [id, key] of [["tm-n", "n"], ["tm-minutes", "minutes"], ["tm-perq", "perq"]]) {
+    // input：边打字边联动；blur：把没填完/填错的数字归一化
+    $(id).addEventListener("input", () => { if (!tmRunning()) tmSyncFromInputs(key); });
+    $(id).addEventListener("blur", () => { if (!tmRunning()) { tmSyncFromInputs(key); tmPaintSettings(""); } });
   }
   $("tab-timer").addEventListener("click", (e) => {
     const mode = e.target.closest("[data-mode]");
@@ -1292,6 +1341,7 @@ wire();
 wireInstallEvents();
 renderMeta(false);
 renderAll();
+tmPaintSettings();
 renderTimer();
 syncFullscreenButton();
 syncInstallButton();
