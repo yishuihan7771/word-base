@@ -126,6 +126,11 @@ def parse(word, raw):
 
 
 def fetch(word):
+    """取汉典词条页。
+
+    404 直接判定「汉典没收录」，立刻返回 None、不重试——退避只留给限流/网络故障。
+    否则遇到汉典本来就没有的词会白等三次退避（实测每个词 20 秒，几百个词就是几十分钟）。
+    """
     url = BASE + urllib.parse.quote(word)
     last = ""
     for attempt in range(1, RETRIES + 2):
@@ -133,10 +138,12 @@ def fetch(word):
             req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9"})
             return urllib.request.urlopen(req, timeout=25).read()
         except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                return None
             last = f"HTTP {exc.code}"
         except Exception as exc:
             last = type(exc).__name__
-        time.sleep(3 * attempt)  # 汉典会限流，退避后再试
+        time.sleep(3 * attempt)
     raise RuntimeError(last or "unknown")
 
 
@@ -164,16 +171,24 @@ def main():
         targets = targets[: args.limit]
     print(f"待补 {len(targets)} 条（--only {args.only}）")
 
-    def_added = py_added = failed = 0
+    def_added = py_added = missing = failed = 0
     for i, entry in enumerate(targets, 1):
         word = entry["w"]
         try:
-            defn, pinyin = parse(word, fetch(word))
+            raw = fetch(word)
         except Exception as exc:
             failed += 1
-            print(f"{i:3d}/{len(targets)} {word:<8s} - {exc}")
+            print(f"{i:3d}/{len(targets)} {word:<8s} ! {exc}")
+            sys.stdout.flush()
             time.sleep(DELAY)
             continue
+        if raw is None:   # 汉典没收录，不必再试
+            missing += 1
+            print(f"{i:3d}/{len(targets)} {word:<8s} - 汉典未收录")
+            sys.stdout.flush()
+            time.sleep(0.3)
+            continue
+        defn, pinyin = parse(word, raw)
         marks = []
         if defn and not entry.get("def"):
             entry["def"] = defn
@@ -199,13 +214,15 @@ def main():
                 e["abbr"] = want
 
     if args.dry_run:
-        print(f"\n[dry-run] 将会新增释义 {def_added} 条、拼音 {py_added} 条；失败 {failed} 条")
+        print(f"\n[dry-run] 将会新增释义 {def_added} 条、拼音 {py_added} 条；"
+              f"汉典未收录 {missing} 条、请求失败 {failed} 条")
         return
     parts = db["version"].rsplit(".", 1)
     db["version"] = parts[0] + "." + str(int(parts[1]) + 1)
     words_path.write_text(json.dumps(db, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     still = [e["w"] for e in db["words"] if not e.get("def")]
-    print(f"\n新增释义 {def_added} 条、拼音 {py_added} 条，失败 {failed} 条；版本 -> {db['version']}")
+    print(f"\n新增释义 {def_added} 条、拼音 {py_added} 条；汉典未收录 {missing} 条、请求失败 {failed} 条；"
+          f"版本 -> {db['version']}")
     print(f"仍缺释义 {len(still)} 条：{'、'.join(still)}")
 
 
