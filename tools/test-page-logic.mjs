@@ -25,7 +25,7 @@ const check = (name, got, want) => {
 let focusCalls = 0;
 function makeEl(id = "") {
   return {
-    id, value: "", textContent: "", innerHTML: "", hidden: false, dataset: {}, files: [],
+    id, value: "", textContent: "", innerHTML: "", hidden: false, dataset: {}, files: [], style: {},
     classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
     addEventListener() {}, setAttribute() {}, focus() { focusCalls++; }, click() {},
     closest: () => null, matches: () => false, querySelectorAll: () => [],
@@ -36,17 +36,37 @@ let fileText = wordsText;
 let fsCalls = 0;          // documentElement.requestFullscreen 调用次数
 let promptCalls = 0;      // 安装框 prompt() 调用次数
 let swCalls = 0;          // serviceWorker.register 调用次数
+let chimeCalls = 0;       // 计时到点的提示音（振荡器）次数
+let vibrateCalls = 0;     // 振动次数
 function boot({ protocol = "http:", failFetch = false, persist = new Map(), touch = false,
-                standalone = false, noFullscreen = false, ios = false, swThrows = false } = {}) {
+                standalone = false, noFullscreen = false, ios = false, swThrows = false,
+                startAt = 1750000000000 } = {}) {
   const els = new Map();
   const store = persist;
   const handlers = {};   // window 上的事件处理器，测试里手动触发
   let fetchCalls = 0;
+  // 可控时钟：计时一律按时间戳算，测试里靠推进它来模拟真实流逝
+  const clock = { now: startAt, advance(ms) { this.now += ms; return this.now; } };
+  const RealDate = Date;
+  class FakeDate extends RealDate {
+    constructor(...args) { super(...(args.length ? args : [clock.now])); }
+    static now() { return clock.now; }
+  }
   const documentElement = noFullscreen ? {} : {
     requestFullscreen() { fsCalls++; return Promise.resolve(); },
   };
+  const document = {
+    documentElement,
+    body: makeEl("body"),
+    fullscreenElement: null,
+    activeElement: null,
+    exitFullscreen() { return Promise.resolve(); },
+    getElementById(id) { if (!els.has(id)) els.set(id, makeEl(id)); return els.get(id); },
+    querySelector: () => makeEl("sel"), querySelectorAll: () => [], addEventListener() {}, createElement: () => makeEl(),
+  };
   const context = {
-    console, setTimeout, clearTimeout, Date, Math, JSON, Object, Array, String, Number, Boolean, RegExp, Error, Promise,
+    console, setTimeout, clearTimeout, setInterval, clearInterval,
+    Date: FakeDate, Math, JSON, Object, Array, String, Number, Boolean, RegExp, Error, Promise,
     confirm: () => true,
     location: { protocol, href: protocol === "file:" ? "file:///index.html" : "http://127.0.0.1/" },
     window: {
@@ -54,6 +74,7 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
       navigator: {
         standalone,
         userAgent: ios ? "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Safari/604.1" : "Mozilla/5.0 (Linux; Android 14) Chrome/125",
+        vibrate() { vibrateCalls++; return true; },
         serviceWorker: {
           register: () => {
             swCalls++;
@@ -61,18 +82,18 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
           },
         },
       },
+      AudioContext: class {
+        constructor() { this.currentTime = 0; this.state = "running"; this.destination = {}; }
+        resume() {}
+        createOscillator() { chimeCalls++; return { frequency: { value: 0 }, connect() {}, start() {}, stop() {} }; }
+        createGain() { return { gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect() {} }; }
+      },
       matchMedia: (q) => ({
         matches: (/pointer:\s*fine/.test(q) && !touch) || (/display-mode/.test(q) && standalone),
       }),
       addEventListener(type, fn) { (handlers[type] = handlers[type] || []).push(fn); },
     },
-    document: {
-      documentElement,
-      fullscreenElement: null,
-      exitFullscreen() { return Promise.resolve(); },
-      getElementById(id) { if (!els.has(id)) els.set(id, makeEl(id)); return els.get(id); },
-      querySelectorAll: () => [], addEventListener() {}, createElement: () => makeEl(),
-    },
+    document,
     localStorage: {
       getItem: (k) => (store.has(k) ? store.get(k) : null),
       setItem: (k, v) => store.set(k, String(v)),
@@ -90,7 +111,9 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   vm.createContext(context);
   vm.runInContext(script, context, { filename: "index.html" });
   const fire = (type, event) => { for (const fn of handlers[type] || []) fn(event); };
-  return { context, els, store, handlers, fire, fetchCalls: () => fetchCalls, html: (id) => els.get(id)?.innerHTML ?? "" };
+  const text = (id) => els.get(id)?.textContent ?? "";
+  return { context, els, store, handlers, fire, clock, text,
+           fetchCalls: () => fetchCalls, html: (id) => els.get(id)?.innerHTML ?? "" };
 }
 
 // ---------------------------------------------------------------- 正常使用
@@ -309,6 +332,105 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   swCalls = 0;
   boot({ protocol: "file:", failFetch: true });
   check("file:// 下不注册 service worker", swCalls, 0);
+}
+
+// ---------------------------------------------------------------- 做题计时
+{
+  // 模式一：区间计时。20 题 / 20 分钟 → 每题 60 秒，题号按已过时间推算
+  const a = boot({ protocol: "http:", failFetch: true });
+  a.els.get("tm-n").value = "20";
+  a.els.get("tm-minutes").value = "20";
+  a.context.renderTimer();
+  check("区间模式显示平均每题秒数", /平均每题 60 秒/.test(a.text("tm-avg-hint")), true);
+  check("未开始时浮条是隐藏的", a.els.get("timer-bar").hidden, true);
+
+  a.context.tmStart();
+  check("开始后浮条出现", a.els.get("timer-bar").hidden, false);
+  check("开始后大字显示第 1 题", a.text("tm-big"), "第 1 题");
+  check("开始后状态是计时中", /计时中/.test(a.text("tm-phase")), true);
+
+  a.clock.advance(90000);          // 过了 90 秒 → 应该在第二题（60 秒一题）
+  a.context.tmTick();
+  a.context.renderTimer();
+  check("90 秒后应该在第 2 题", a.text("tm-big"), "第 2 题");
+  check("按时间应完成 1 题", a.text("tm-done"), "按时间应完成 1 题");
+  check("浮条同步显示应在第几题", a.text("tb-pos"), "应在第 2/20 题");
+  check("浮条倒计时是总时间剩余", a.text("tb-clock"), "18:30");
+
+  a.clock.advance(1110000);        // 累加到 20 分钟整
+  a.context.tmTick();
+  check("到总时间自动结束", /已结束/.test(a.text("tm-phase")), true);
+  check("结束后浮条隐藏", a.els.get("timer-bar").hidden, true);
+  check("结果写明计划与用时", /计划 20 题 \/ 20 分钟/.test(a.text("tm-result")), true);
+  check("结束后记录了本轮历史", JSON.parse(a.store.get("kg.timer.v1")).history.length, 1);
+  check("区间模式不显示「下一题」", a.els.get("tb-next").hidden, true);
+
+  // 模式二：分题计时。3 题 / 每题 30 秒，时间到要响声音提示并等用户点下一题
+  chimeCalls = 0;
+  vibrateCalls = 0;
+  const p = boot({ protocol: "http:", failFetch: true });
+  p.context.tmSetMode("perq");
+  p.els.get("tm-n").value = "3";
+  p.els.get("tm-perq").value = "30";
+  p.context.tmStart();
+  p.context.renderTimer();
+  check("分题模式大字显示题号", p.text("tm-big"), "第 1 题");
+  check("分题模式不显示总时间输入", p.els.get("tm-range-only").hidden, true);
+
+  p.clock.advance(30000);
+  p.context.tmTick();
+  p.context.renderTimer();
+  check("时间到大字变成「时间到」", p.text("tm-big"), "时间到");
+  check("时间到会响提示音（3 声）", chimeCalls, 3);
+  check("时间到同时振动", vibrateCalls, 1);
+  check("时间到后状态是等下一题", /等下一题/.test(p.text("tm-phase")), true);
+  check("时间到后「下一题」按钮可用", p.els.get("tm-next").disabled, false);
+  check("浮条也提示该换题了", /该换题了/.test(p.text("tb-pos")), true);
+
+  p.context.tmNextQuestion();
+  p.context.renderTimer();
+  check("点下一题进入第 2 题", p.text("tm-big"), "第 2 题");
+  check("超时被计入", p.text("tm-timeout"), "超时 1 题");
+
+  p.clock.advance(10000);          // 第 2 题提前 20 秒做完
+  p.context.tmNextQuestion();
+  p.context.renderTimer();
+  check("提前做完也能进入下一题", p.text("tm-big"), "第 3 题");
+
+  p.clock.advance(30000);
+  p.context.tmTick();
+  p.context.tmNextQuestion();
+  check("做完最后一题自动结束", /已结束/.test(p.text("tm-phase")), true);
+  check("结果统计共 3 题", /共 3 \/ 3 题/.test(p.text("tm-result")), true);
+  check("结果里有平均每题", /平均每题/.test(p.text("tm-result")), true);
+  check("分题模式记录超时数", /超时 2 题/.test(p.text("tm-result")), true);
+
+  // 暂停：暂停期间不该继续消耗时间
+  const q2 = boot({ protocol: "http:", failFetch: true });
+  q2.context.tmSetMode("perq");
+  q2.els.get("tm-n").value = "3";
+  q2.els.get("tm-perq").value = "30";
+  q2.context.tmStart();
+  q2.clock.advance(10000);
+  q2.context.tmPauseToggle();
+  check("暂停后状态是已暂停", /已暂停/.test(q2.text("tm-phase")), true);
+  q2.clock.advance(120000);        // 暂停两分钟
+  q2.context.tmPauseToggle();
+  q2.clock.advance(5000);          // 恢复后再走 5 秒，共 15 秒，不该到点
+  q2.context.tmTick();
+  q2.context.renderTimer();
+  check("暂停的时间不计入本题", /第 1 题/.test(q2.text("tm-big")), true);
+  check("恢复后计时继续（未误判超时）", /计时中/.test(q2.text("tm-phase")), true);
+
+  // 设置会存到本机，下次打开还在
+  const keep = JSON.parse(q2.store.get("kg.timer.v1"));
+  check("设置写入本机", [keep.mode, keep.n, keep.perq], ["perq", 3, 30]);
+  const again = boot({ protocol: "http:", failFetch: true, persist: q2.store });
+  check("重开页面沿用上次设置", [again.text("tm-phase"), again.els.get("tm-n").value], ["未开始", 3]);
+
+  // 计时中不让切模式，避免把一轮的统计搞乱
+  q2.context.tmSetMode("range");
+  check("计时中切换模式会被拦住", /先结束本轮/.test(q2.text("toast")), true);
 }
 
 console.log(`\n${failures ? failures + " FAILURE(S)" : "all checks passed"}`);

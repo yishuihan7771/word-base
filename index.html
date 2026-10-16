@@ -97,6 +97,29 @@
   .progress{color:var(--muted);font-size:13px;margin-top:6px}
   .empty{text-align:center;color:var(--muted);padding:26px 10px}
   .empty .big{font-size:34px;margin-bottom:8px}
+  /* 做题计时 */
+  .field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+  .field input{
+    width:8em;font:inherit;font-size:16px;color:var(--fg);background:var(--card);
+    border:1px solid var(--line);border-radius:10px;padding:9px 12px;outline:none;
+  }
+  .field input:focus{border-color:var(--accent)}
+  .tm-big{
+    font-size:66px;font-weight:800;line-height:1.05;letter-spacing:1px;
+    font-variant-numeric:tabular-nums;word-break:keep-all;
+  }
+  .tm-big.tm-tight{font-size:52px}
+  .tm-big.tm-done{color:var(--good)}
+  .tm-big.over{color:var(--bad)}
+  @keyframes tmflash{0%,100%{background-color:transparent}50%{background-color:color-mix(in srgb,var(--bad) 22%,transparent)}}
+  .flash{animation:tmflash .45s ease-in-out 6;border-radius:var(--radius)}
+  #timer-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0 auto;max-width:860px;
+    padding:10px 16px calc(12px + env(safe-area-inset-bottom));
+    background:var(--card);border-top:1px solid var(--line);box-shadow:0 -8px 28px rgba(0,0,0,.22);
+  }
+  #timer-bar[hidden]{display:none}
+  body.timer-open .wrap{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
   #toast{
     position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
     background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;
@@ -128,6 +151,7 @@
     <button role="tab" data-tab="search" aria-selected="true">查询</button>
     <button role="tab" data-tab="stats">频率统计</button>
     <button role="tab" data-tab="drill">刷词模式</button>
+    <button role="tab" data-tab="timer">做题计时</button>
     <button role="tab" data-tab="data">数据</button>
   </nav>
 
@@ -181,6 +205,57 @@
       </div>
     </section>
 
+    <!-- 做题计时 -->
+    <section id="tab-timer" hidden>
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <strong>做题计时</strong>
+          <span class="counter" id="tm-phase">未开始</span>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button data-mode="range" class="primary">模式一 · 区间计时</button>
+          <button data-mode="perq" class="ghost">模式二 · 分题计时</button>
+        </div>
+        <p class="hint" id="tm-mode-hint"></p>
+
+        <div class="row" style="margin-top:12px;gap:14px">
+          <label class="field">题量（题）
+            <input type="number" id="tm-n" min="1" max="300" step="1" inputmode="numeric" value="20">
+          </label>
+          <label class="field" id="tm-range-only">总时间（分钟）
+            <input type="number" id="tm-minutes" min="1" max="600" step="1" inputmode="numeric" value="20">
+          </label>
+          <label class="field" id="tm-perq-only">每题间隔（秒）
+            <input type="number" id="tm-perq" min="5" max="900" step="5" inputmode="numeric" value="50">
+          </label>
+        </div>
+        <p class="hint" id="tm-avg-hint"></p>
+
+        <div class="row" style="margin-top:12px">
+          <button id="tm-start" class="primary">开始</button>
+          <button id="tm-pause" class="ghost" disabled>暂停</button>
+          <button id="tm-next" class="primary" disabled>下一题 →</button>
+          <button id="tm-stop" class="ghost" disabled>结束本轮</button>
+        </div>
+      </div>
+
+      <div class="card" style="text-align:center">
+        <div class="tm-big" id="tm-big">—</div>
+        <div class="counter" id="tm-sub" style="margin-top:4px">设置好题量和时间后点开始</div>
+        <div class="barwrap" style="margin:14px 0"><span class="bar" id="tm-bar" style="width:0%"></span></div>
+        <div class="row" style="justify-content:center;gap:16px">
+          <span class="counter" id="tm-done">完成 0 题</span>
+          <span class="counter" id="tm-left">剩余 —</span>
+          <span class="counter" id="tm-timeout">超时 0 题</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <strong>本轮结果</strong>
+        <div class="hint" id="tm-result" style="margin-top:8px">还没开始。</div>
+      </div>
+    </section>
+
     <!-- 数据 -->
     <section id="tab-data" hidden>
       <div class="card">
@@ -217,6 +292,20 @@
     </section>
   </main>
 </div>
+
+<!-- 计时浮条：做题时不用切回「做题计时」页也能看到时间 -->
+<div id="timer-bar" hidden>
+  <div class="row" style="justify-content:space-between;gap:10px">
+    <span class="counter" id="tb-pos">—</span>
+    <strong id="tb-clock" style="font-variant-numeric:tabular-nums;font-size:19px">00:00</strong>
+  </div>
+  <div class="barwrap" style="margin:8px 0"><span class="bar" id="tb-bar" style="width:0%"></span></div>
+  <div class="row" style="justify-content:space-between">
+    <button id="tb-pause" class="ghost">暂停</button>
+    <button id="tb-next" class="primary">下一题 →</button>
+    <button id="tb-stop" class="ghost">结束</button>
+  </div>
+</div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -226,6 +315,7 @@ const DB_URL = "words.json";
 const K_DB = "kg.db.v1";        // cached library {version, updated, words[]}
 const K_STATS = "kg.stats.v1";  // per word: {q, known, unknown, collected, dup, last}
 const K_NOTES = "kg.notes.v1";  // per word: manual supplement {tone, pos, modifies, subject, note}
+const K_TIMER = "kg.timer.v1";  // 做题计时的设置与最近几轮结果
 const K_LEGACY_LOCAL = "kg.local.v1"; // retired: words used to be addable by hand, local-only
 
 const $ = (id) => document.getElementById(id);
@@ -235,6 +325,20 @@ const state = {
   notes: {},
   editing: "",  // the word whose supplement form is open
   drill: { i: 0, flipped: false, filter: "all", list: [] },
+  tm: {
+    mode: "range",       // range=区间计时（总时间均分） / perq=分题计时（每题倒计时）
+    phase: "idle",       // idle / running / paused / waiting（一道题时间到，等点下一题） / done
+    n: 20, minutes: 20, perq: 50,
+    t0: 0,               // 本轮开始的时间戳
+    pausedMs: 0,         // 累计暂停时长
+    pausedAt: 0,
+    index: 1,            // 当前第几题（1 起）
+    qStart: 0,           // 当前这道题开始的时间戳
+    qTimes: [],          // 每题实际用时（毫秒）
+    timeouts: 0,
+    result: "",
+    history: [],         // 最近几轮 {at, mode, done, n, ms, timeouts}
+  },
 };
 
 // ---------------------------------------------------------------- storage
@@ -242,6 +346,15 @@ const state = {
 function loadStore() {
   try { state.stats = JSON.parse(localStorage.getItem(K_STATS) || "{}") || {}; } catch { state.stats = {}; }
   try { state.notes = JSON.parse(localStorage.getItem(K_NOTES) || "{}") || {}; } catch { state.notes = {}; }
+  try {
+    const saved = JSON.parse(localStorage.getItem(K_TIMER) || "null");
+    if (saved && typeof saved === "object") {
+      for (const key of ["mode", "n", "minutes", "perq", "history"]) {
+        if (saved[key] !== undefined) state.tm[key] = saved[key];
+      }
+      if (!Array.isArray(state.tm.history)) state.tm.history = [];
+    }
+  } catch {}
   let cached = null;
   try { cached = JSON.parse(localStorage.getItem(K_DB) || "null"); } catch { cached = null; }
   if (cached && Array.isArray(cached.words)) state.db = cached;
@@ -249,6 +362,10 @@ function loadStore() {
 const saveStats = () => localStorage.setItem(K_STATS, JSON.stringify(state.stats));
 const saveDb = () => localStorage.setItem(K_DB, JSON.stringify(state.db));
 const saveNotes = () => localStorage.setItem(K_NOTES, JSON.stringify(state.notes));
+const saveTimer = () => localStorage.setItem(K_TIMER, JSON.stringify({
+  mode: state.tm.mode, n: state.tm.n, minutes: state.tm.minutes, perq: state.tm.perq,
+  history: state.tm.history.slice(0, 10),
+}));
 
 // 手动补充：填进 state.notes[word]，展示时覆盖词库里的空字段，不改动 words.json。
 function saveNote(word, fields) {
@@ -604,6 +721,303 @@ function readFile(file) {
   reader.readAsText(file, "utf-8");
 }
 
+// ---------------------------------------------------------------- 做题计时
+
+// 两种模式（按需求）：
+//   range 区间计时：设「做多少道题」＋「多少分钟内完成」，把总时间平均分给每题，
+//                   计时中根据已过时间算出「现在应该做到第几题」，题号用大字显示。
+//   perq  分题计时：设「题量」＋「每题间隔」，一题一倒计时；时间到响声音提示并弹出
+//                   「下一题」按钮，点了才接着计时，直到做完。
+// 计时一律用时间戳算，不累加定时器 tick——手机锁屏/切后台时浏览器会把定时器降频，
+// 那样会越走越慢；按时间戳算则始终准确（只是提示音可能晚一点响）。
+
+const ms = (sec) => Math.max(0, Math.round(sec * 1000));
+function mmss(totalSeconds) {
+  const s = Math.max(0, Math.ceil(totalSeconds));
+  return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+const tmPerQuestionMs = () => Math.max(1000, Math.round(ms(state.tm.minutes * 60) / Math.max(1, state.tm.n)));
+const tmElapsedMs = () => {
+  if (!state.tm.t0) return 0;
+  const paused = state.tm.phase === "paused" ? Date.now() - state.tm.pausedAt : 0;
+  return Math.max(0, Date.now() - state.tm.t0 - state.tm.pausedMs - paused);
+};
+const tmRunning = () => state.tm.phase === "running" || state.tm.phase === "paused" || state.tm.phase === "waiting";
+
+// 声音提示：用 WebAudio 合成，不依赖音频文件；顺带振动（安卓支持）。iOS 静音档下可能无声，
+// 所以同时让大字闪一下，保证看得见。
+let audioCtx = null;
+function tmChime(times) {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (Ctx) {
+      audioCtx = audioCtx || new Ctx();
+      if (audioCtx.state === "suspended" && audioCtx.resume) audioCtx.resume();
+      const at = audioCtx.currentTime;
+      for (let i = 0; i < (times || 3); i++) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = i === 2 ? 1174 : 880;
+        gain.gain.setValueAtTime(0.0001, at + i * 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.3, at + i * 0.3 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + i * 0.3 + 0.24);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(at + i * 0.3);
+        osc.stop(at + i * 0.3 + 0.26);
+      }
+    }
+  } catch {}
+  try { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate([140, 90, 140]); } catch {}
+  const big = $("tm-big");
+  if (big && big.classList) {
+    big.classList.add("flash");
+    setTimeout(() => big.classList.remove("flash"), 2800);
+  }
+}
+
+let tmTicker = null;
+function tmStartTicker() {
+  if (tmTicker) return;
+  tmTicker = setInterval(() => {
+    tmTick();
+    renderTimer();
+  }, 200);
+}
+function tmStopTicker() {
+  if (tmTicker) { clearInterval(tmTicker); tmTicker = null; }
+}
+
+// 读设置
+function tmReadSettings() {
+  const clamp = (v, lo, hi, fallback) => {
+    const num = parseInt(v, 10);
+    return Number.isFinite(num) ? Math.min(hi, Math.max(lo, num)) : fallback;
+  };
+  state.tm.n = clamp($("tm-n").value, 1, 300, 20);
+  state.tm.minutes = clamp($("tm-minutes").value, 1, 600, 20);
+  state.tm.perq = clamp($("tm-perq").value, 5, 900, 50);
+  $("tm-n").value = state.tm.n;
+  $("tm-minutes").value = state.tm.minutes;
+  $("tm-perq").value = state.tm.perq;
+  saveTimer();
+}
+
+function tmSetMode(mode) {
+  if (tmRunning()) { toast("先结束本轮再切换模式"); return; }
+  state.tm.mode = mode === "perq" ? "perq" : "range";
+  state.tm.phase = "idle";
+  state.tm.result = "";
+  saveTimer();
+  renderTimer();
+}
+
+function tmStart() {
+  tmReadSettings();
+  const t = state.tm;
+  t.phase = "running";
+  t.t0 = Date.now();
+  t.pausedMs = 0;
+  t.pausedAt = 0;
+  t.index = 1;
+  t.qStart = Date.now();
+  t.qTimes = [];
+  t.timeouts = 0;
+  t.result = "";
+  tmStartTicker();
+  renderTimer();
+  toast(t.mode === "range"
+    ? "开始：平均每题 " + Math.round(tmPerQuestionMs() / 1000) + " 秒"
+    : "开始：每题 " + t.perq + " 秒，时间到会响");
+}
+
+function tmPauseToggle() {
+  const t = state.tm;
+  if (t.phase === "running" || t.phase === "waiting") {
+    t.resumeTo = t.phase;          // 记住暂停前是「计时中」还是「等下一题」
+    t.phase = "paused";
+    t.pausedAt = Date.now();
+    tmStopTicker();
+    renderTimer();
+    return;
+  }
+  if (t.phase === "paused") {
+    const pauseLen = Date.now() - t.pausedAt;
+    t.pausedMs += pauseLen;
+    t.pausedAt = 0;
+    // 当前这题的计时也要跳过暂停的这段，否则暂停一下就变成超时
+    if (t.qStart && t.mode === "perq") t.qStart += pauseLen;
+    t.phase = t.resumeTo || "running";
+    t.resumeTo = "";
+    if (t.phase === "running") tmStartTicker();
+    renderTimer();
+  }
+}
+
+// 一道题结束：记用时，推进题号。是否超时由计时器自己的状态判定——不能靠调用方传参，
+// 因为「时间到之后用户才点下一题」和「没到时间就点下一题」走的是同一个按钮。
+function tmNextQuestion() {
+  const t = state.tm;
+  if (!tmRunning()) return;
+  const used = t.qStart ? Date.now() - t.qStart : ms(t.perq);
+  const timedOut = t.mode === "perq" && (t.phase === "waiting" || used >= ms(t.perq));
+  // 超时那几题按限时计入，避免中途离席把平均用时带偏（结果里会单列超时数）
+  t.qTimes.push(timedOut ? ms(t.perq) : used);
+  if (timedOut) t.timeouts += 1;
+  t.index += 1;
+  t.qStart = Date.now();
+  if (t.index > t.n) { tmFinish("done"); return; }
+  t.phase = "running";
+  tmStartTicker();
+  renderTimer();
+}
+
+function tmFinish(why) {
+  const t = state.tm;
+  tmStopTicker();
+  const totalMs = tmElapsedMs();
+  const spentSec = totalMs / 1000;
+  t.phase = "done";
+  if (t.mode === "range") {
+    // 区间模式不记录每题，只能按时间推算「应该完成了几题」
+    const shouldDone = Math.max(0, Math.min(t.n, Math.floor(totalMs / tmPerQuestionMs()) + 1) - 1);
+    t.result = (why === "early" ? "提前结束：" : "本轮结束：") +
+      "计划 " + t.n + " 题 / " + t.minutes + " 分钟（平均每题 " + Math.round(tmPerQuestionMs() / 1000) + " 秒）；" +
+      "实际用时 " + mmss(spentSec) + "，按时间应完成 " + shouldDone + " 题。";
+    t.history.unshift({ at: new Date().toISOString(), mode: t.mode, n: t.n, done: shouldDone, ms: totalMs, timeouts: 0 });
+  } else {
+    const inTime = t.qTimes.filter((x) => x < ms(t.perq)).length;
+    const avg = t.qTimes.length ? Math.round(t.qTimes.reduce((a, b) => a + b, 0) / t.qTimes.length / 1000) : 0;
+    t.result = (why === "early" ? "提前结束：" : "本轮结束：") +
+      "共 " + t.qTimes.length + " / " + t.n + " 题，用时 " + mmss(spentSec) +
+      (t.qTimes.length ? "，平均每题 " + avg + " 秒，限时内 " + inTime + " 题" : "") +
+      (t.timeouts ? "，超时 " + t.timeouts + " 题。" : "。");
+    t.history.unshift({ at: new Date().toISOString(), mode: t.mode, n: t.n, done: t.qTimes.length, ms: totalMs, timeouts: t.timeouts });
+  }
+  t.history = t.history.slice(0, 10);
+  saveTimer();
+  renderTimer();
+}
+
+function tmStop() {
+  if (!tmRunning()) return;
+  tmFinish("early");
+}
+
+// 每秒（200ms）走一次：只更新时间显示，并在关键时刻触发提示
+function tmTick() {
+  const t = state.tm;
+  if (t.phase !== "running") return;
+  if (t.mode === "range") {
+    if (tmElapsedMs() >= ms(t.minutes * 60)) { tmChime(3); tmFinish("done"); }
+    return;
+  }
+  if (Date.now() - t.qStart >= ms(t.perq)) {
+    t.phase = "waiting";      // 停在「等点下一题」，不再自动推进
+    tmStopTicker();
+    tmChime(3);
+  }
+}
+
+// 模式一：现在应该是第几题
+const tmShouldBeAt = () => {
+  const t = state.tm;
+  if (t.mode !== "range" || !t.t0) return t.index;
+  return Math.min(t.n, Math.floor(tmElapsedMs() / tmPerQuestionMs()) + 1);
+};
+
+function renderTimer() {
+  const t = state.tm;
+  const running = tmRunning();
+  if ($("tm-n") && document.activeElement !== $("tm-n")) $("tm-n").value = t.n;
+  if ($("tm-minutes") && document.activeElement !== $("tm-minutes")) $("tm-minutes").value = t.minutes;
+  if ($("tm-perq") && document.activeElement !== $("tm-perq")) $("tm-perq").value = t.perq;
+
+  const rangeMode = t.mode === "range";
+  $("tm-mode-hint").textContent = rangeMode
+    ? "模式一 · 区间计时：设好题量和总时间，总时间平均分给每题，大字显示你现在应该做到第几题。"
+    : "模式二 · 分题计时：设好题量和每题间隔，每题单独倒计时；时间到会响一声并等你点「下一题」。";
+  $("tm-range-only").hidden = !rangeMode;
+  $("tm-perq-only").hidden = rangeMode;
+  $("tm-avg-hint").textContent = rangeMode
+    ? "平均每题 " + Math.round(tmPerQuestionMs() / 1000) + " 秒（" + t.minutes + " 分钟 ÷ " + t.n + " 题）"
+    : "共 " + t.n + " 题，每题 " + t.perq + " 秒";
+
+  const phaseText = { idle: "未开始", running: "计时中", paused: "已暂停", waiting: "等下一题", done: "已结束" }[t.phase] || "";
+  $("tm-phase").textContent = phaseText + (running || t.phase === "done" ? " · " + (rangeMode ? "区间计时" : "分题计时") : "");
+
+  // 大字区
+  const big = $("tm-big");
+  const sub = $("tm-sub");
+  let barPct = 0;
+  if (rangeMode) {
+    const should = tmShouldBeAt();
+    const leftSec = t.t0 ? Math.max(0, t.minutes * 60 - tmElapsedMs() / 1000) : t.minutes * 60;
+    big.textContent = t.phase === "idle" ? "第 — 题" : "第 " + should + " 题";
+    big.className = "tm-big" + (t.phase === "done" ? " tm-done" : "");
+    sub.textContent = t.phase === "idle"
+      ? "设置好题量和总时间后点开始"
+      : (should > 1 || tmElapsedMs() > 1000
+        ? "目标第 " + should + "/" + t.n + " 题 · 还剩 " + mmss(leftSec)
+        : "还剩 " + mmss(leftSec) + " · 平均每题 " + Math.round(tmPerQuestionMs() / 1000) + " 秒");
+    barPct = t.t0 ? Math.min(100, (tmElapsedMs() / ms(t.minutes * 60)) * 100) : 0;
+  } else {
+    const left = t.phase === "idle" ? t.perq : (t.phase === "waiting" ? 0 : Math.max(0, t.perq - (Date.now() - t.qStart) / 1000));
+    big.textContent = t.phase === "waiting" ? "时间到" : (t.phase === "idle" ? "第 — 题" : "第 " + Math.min(t.index, t.n) + " 题");
+    big.className = "tm-big tm-tight" + (t.phase === "waiting" ? " over" : t.phase === "done" ? " tm-done" : "");
+    sub.textContent = t.phase === "waiting"
+      ? "点「下一题」接着计时（第 " + Math.min(t.index, t.n) + "/" + t.n + " 题）"
+      : t.phase === "idle"
+        ? "设置好题量和每题间隔后点开始"
+        : "倒计时 " + mmss(left) + " · 第 " + Math.min(t.index, t.n) + "/" + t.n + " 题";
+    barPct = t.phase === "idle" ? 0
+      : (t.phase === "waiting" ? 100 : Math.min(100, ((Date.now() - t.qStart) / ms(t.perq)) * 100));
+  }
+  $("tm-bar").style.width = barPct.toFixed(1) + "%";
+  const doneCount = rangeMode ? Math.max(0, tmShouldBeAt() - 1) : t.qTimes.length;
+  $("tm-done").textContent = (rangeMode ? "按时间应完成 " : "完成 ") + doneCount + " 题";
+  $("tm-left").textContent = rangeMode
+    ? (t.phase === "idle" ? "剩余 —" : "剩余 " + mmss(Math.max(0, t.minutes * 60 - tmElapsedMs() / 1000)))
+    : "剩余 " + (t.phase === "idle" ? "—" : mmss(Math.max(0, (t.n - t.index + 1) * t.perq)));
+  $("tm-timeout").textContent = "超时 " + t.timeouts + " 题";
+  $("tm-result").textContent = t.result || "还没开始。";
+
+  // 按钮状态
+  $("tm-start").disabled = running;
+  $("tm-start").textContent = t.phase === "done" ? "再来一轮" : "开始";
+  $("tm-pause").disabled = !running;
+  $("tm-pause").textContent = t.phase === "paused" ? "继续" : "暂停";
+  $("tm-next").disabled = !(t.phase === "waiting" || (!rangeMode && t.phase === "running"));
+  $("tm-stop").disabled = !running;
+
+  renderTimerBar();
+}
+
+function renderTimerBar() {
+  const t = state.tm;
+  const bar = $("timer-bar");
+  if (!bar) return;
+  const show = tmRunning();
+  bar.hidden = !show;
+  document.body.classList.toggle("timer-open", show);
+  $("tb-next").hidden = t.mode === "range";
+  if (!show) return;
+  const rangeMode = t.mode === "range";
+  $("tb-pos").textContent = rangeMode
+    ? "应在第 " + tmShouldBeAt() + "/" + t.n + " 题"
+    : (t.phase === "waiting" ? "该换题了 · " + Math.min(t.index, t.n) + "/" + t.n : "第 " + Math.min(t.index, t.n) + "/" + t.n + " 题");
+  if (rangeMode) {
+    $("tb-clock").textContent = mmss(Math.max(0, t.minutes * 60 - tmElapsedMs() / 1000));
+    $("tb-bar").style.width = Math.min(100, (tmElapsedMs() / ms(t.minutes * 60)) * 100).toFixed(1) + "%";
+  } else {
+    const left = t.phase === "waiting" ? 0 : Math.max(0, t.perq - (Date.now() - t.qStart) / 1000);
+    $("tb-clock").textContent = t.phase === "waiting" ? "时间到" : mmss(left);
+    $("tb-bar").style.width = (t.phase === "waiting" ? 100 : Math.min(100, ((Date.now() - t.qStart) / ms(t.perq)) * 100)).toFixed(1) + "%";
+  }
+  $("tb-pause").textContent = t.phase === "paused" ? "继续" : "暂停";
+}
+
 // ---------------------------------------------------------------- plumbing
 
 function esc(s) {
@@ -761,6 +1175,7 @@ function switchTab(name) {
   for (const s of document.querySelectorAll("main > section")) s.hidden = s.id !== "tab-" + name;
   if (name === "search" && hasHardwareKeyboard()) $("q").focus();
   if (name === "drill") buildDrillList();
+  if (name === "timer") renderTimer();
 }
 
 function wire() {
@@ -771,6 +1186,21 @@ function wire() {
       const first = search($("q").value)[0];
       if (first) openWord(first.w);
     }
+  });
+  // 计时：页内的按钮 + 浮条上的按钮
+  $("tm-start").addEventListener("click", tmStart);
+  $("tm-pause").addEventListener("click", tmPauseToggle);
+  $("tm-next").addEventListener("click", tmNextQuestion);
+  $("tm-stop").addEventListener("click", tmStop);
+  $("tb-pause").addEventListener("click", tmPauseToggle);
+  $("tb-next").addEventListener("click", tmNextQuestion);
+  $("tb-stop").addEventListener("click", tmStop);
+  for (const id of ["tm-n", "tm-minutes", "tm-perq"]) {
+    $(id).addEventListener("change", () => { if (!tmRunning()) { tmReadSettings(); renderTimer(); } });
+  }
+  $("tab-timer").addEventListener("click", (e) => {
+    const mode = e.target.closest("[data-mode]");
+    if (mode) tmSetMode(mode.dataset.mode);
   });
   $("results").addEventListener("click", (e) => {
     if (e.target.closest("[data-import]")) { $("file-input").click(); return; }
@@ -862,6 +1292,7 @@ wire();
 wireInstallEvents();
 renderMeta(false);
 renderAll();
+renderTimer();
 syncFullscreenButton();
 syncInstallButton();
 registerServiceWorker();
