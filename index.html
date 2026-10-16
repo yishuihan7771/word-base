@@ -239,6 +239,10 @@
           </label>
         </div>
         <p class="hint" id="tm-avg-hint"></p>
+        <label class="row" style="margin-top:10px;font-size:13px;color:var(--muted)">
+          <input type="checkbox" id="tm-chime" checked style="width:auto">
+          区间模式每推进一题响一声（短促两声；分题模式的「时间到」是三声长鸣）
+        </label>
 
         <div class="row" style="margin-top:12px">
           <button id="tm-start" class="primary">开始</button>
@@ -338,6 +342,8 @@ const state = {
     mode: "range",       // range=区间计时（总时间均分） / perq=分题计时（每题倒计时）
     phase: "idle",       // idle / running / paused / waiting（一道题时间到，等点下一题） / done
     n: 20, minutes: 20, perq: 60,   // 三者默认自洽：20 分钟 ÷ 20 题 = 每题 60 秒
+    chimePerQ: true,                // 区间模式：每推进一题响一声
+    lastShould: 1,                  // 上一次响过的题号，用来判断「推进了」
     t0: 0,               // 本轮开始的时间戳
     pausedMs: 0,         // 累计暂停时长
     pausedAt: 0,
@@ -358,7 +364,7 @@ function loadStore() {
   try {
     const saved = JSON.parse(localStorage.getItem(K_TIMER) || "null");
     if (saved && typeof saved === "object") {
-      for (const key of ["mode", "n", "minutes", "perq", "history"]) {
+      for (const key of ["mode", "n", "minutes", "perq", "history", "chimePerQ"]) {
         if (saved[key] !== undefined) state.tm[key] = saved[key];
       }
       if (!Array.isArray(state.tm.history)) state.tm.history = [];
@@ -373,6 +379,7 @@ const saveDb = () => localStorage.setItem(K_DB, JSON.stringify(state.db));
 const saveNotes = () => localStorage.setItem(K_NOTES, JSON.stringify(state.notes));
 const saveTimer = () => localStorage.setItem(K_TIMER, JSON.stringify({
   mode: state.tm.mode, n: state.tm.n, minutes: state.tm.minutes, perq: state.tm.perq,
+  chimePerQ: state.tm.chimePerQ,
   history: state.tm.history.slice(0, 10),
 }));
 
@@ -756,34 +763,50 @@ const tmRunning = () => state.tm.phase === "running" || state.tm.phase === "paus
 // 声音提示：用 WebAudio 合成，不依赖音频文件；顺带振动（安卓支持）。iOS 静音档下可能无声，
 // 所以同时让大字闪一下，保证看得见。
 let audioCtx = null;
-function tmChime(times) {
+// freqs：每个音的音高（Hz），gap：相邻音的间隔秒数
+function tmPlay(freqs, gap, vibratePattern) {
   try {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (Ctx) {
       audioCtx = audioCtx || new Ctx();
       if (audioCtx.state === "suspended" && audioCtx.resume) audioCtx.resume();
       const at = audioCtx.currentTime;
-      for (let i = 0; i < (times || 3); i++) {
+      freqs.forEach((hz, i) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = "sine";
-        osc.frequency.value = i === 2 ? 1174 : 880;
-        gain.gain.setValueAtTime(0.0001, at + i * 0.3);
-        gain.gain.exponentialRampToValueAtTime(0.3, at + i * 0.3 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, at + i * 0.3 + 0.24);
+        osc.frequency.value = hz;
+        gain.gain.setValueAtTime(0.0001, at + i * gap);
+        gain.gain.exponentialRampToValueAtTime(0.3, at + i * gap + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + i * gap + gap * 0.8);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.start(at + i * 0.3);
-        osc.stop(at + i * 0.3 + 0.26);
-      }
+        osc.start(at + i * gap);
+        osc.stop(at + i * gap + gap * 0.86);
+      });
     }
   } catch {}
-  try { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate([140, 90, 140]); } catch {}
+  try { if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(vibratePattern); } catch {}
+}
+
+function tmFlash(ms) {
   const big = $("tm-big");
   if (big && big.classList) {
     big.classList.add("flash");
-    setTimeout(() => big.classList.remove("flash"), 2800);
+    setTimeout(() => big.classList.remove("flash"), ms || 2800);
   }
+}
+
+// 一道题的时间到了（分题模式）：三声、末音上扬，是「该停手了」
+function tmChime() {
+  tmPlay([880, 880, 1174], 0.3, [140, 90, 140]);
+  tmFlash(2800);
+}
+
+// 区间模式推进到下一题：两声短促、音高不同，只是「提醒你该往后走了」，比上面轻
+function tmAdvanceChime() {
+  tmPlay([660, 990], 0.16, [60]);
+  tmFlash(900);
 }
 
 let tmTicker = null;
@@ -819,6 +842,13 @@ const tmMins = (sec) => {
   return m + ":" + String(s).padStart(2, "0");
 };
 
+function tmSetChime(on) {
+  state.tm.chimePerQ = !!on;
+  // 中途开关都不补响：把游标挪到当前题号
+  if (tmRunning()) state.tm.lastShould = tmShouldBeAt();
+  saveTimer();
+}
+
 function tmSyncFromInputs(edited) {
   const t = state.tm;
   // 分题模式总时间不可输入，一律以「每题」为锚；区间模式则以用户最后改的那个为准
@@ -843,6 +873,7 @@ function tmPaintSettings(skip) {
   if (skip !== "n") $("tm-n").value = t.n;
   if (skip !== "minutes") $("tm-minutes").value = tmShow(t.minutes);
   if (skip !== "perq") $("tm-perq").value = tmShow(t.perq);
+  if ($("tm-chime")) $("tm-chime").checked = !!t.chimePerQ;
 }
 
 function tmSetMode(mode) {
@@ -867,10 +898,11 @@ function tmStart() {
   t.qTimes = [];
   t.timeouts = 0;
   t.result = "";
+  t.lastShould = 1;              // 从第 1 题起，别在第一题就响
   tmStartTicker();
   renderTimer();
   toast(t.mode === "range"
-    ? "开始：平均每题 " + Math.round(tmPerQuestionMs() / 1000) + " 秒"
+    ? "开始：平均每题 " + Math.round(tmPerQuestionMs() / 1000) + " 秒" + (t.chimePerQ ? "，每推进一题响一声" : "")
     : "开始：每题 " + t.perq + " 秒，时间到会响");
 }
 
@@ -952,13 +984,25 @@ function tmTick() {
   const t = state.tm;
   if (t.phase !== "running") return;
   if (t.mode === "range") {
-    if (tmElapsedMs() >= ms(t.minutes * 60)) { tmChime(3); tmFinish("done"); }
+    if (tmElapsedMs() >= ms(t.minutes * 60)) { tmChime(); tmFinish("done"); return; }
+    // 区间模式没有逐题计时，「推进一道题」＝按时间推算的题号往前走了一格。
+    // 只在题号真的变了才响，而且一次只响一声——手机锁屏/切后台回来时可能一下落下好几题，
+    // 那种情况下连响几声只会更烦，响一声 + 提示落下几题更有用。
+    const should = tmShouldBeAt();
+    if (should > t.lastShould) {
+      const skipped = should - t.lastShould - 1;
+      t.lastShould = should;
+      if (t.chimePerQ) {
+        tmAdvanceChime();
+        toast("该做第 " + should + " 题了" + (skipped > 0 ? "（中间落下 " + skipped + " 题）" : ""));
+      }
+    }
     return;
   }
   if (Date.now() - t.qStart >= ms(t.perq)) {
     t.phase = "waiting";      // 停在「等点下一题」，不再自动推进
     tmStopTicker();
-    tmChime(3);
+    tmChime();
   }
 }
 
@@ -1247,6 +1291,7 @@ function wire() {
     $(id).addEventListener("input", () => { if (!tmRunning()) tmSyncFromInputs(key); });
     $(id).addEventListener("blur", () => { if (!tmRunning()) { tmSyncFromInputs(key); tmPaintSettings(""); } });
   }
+  $("tm-chime").addEventListener("change", () => tmSetChime($("tm-chime").checked));
   $("tab-timer").addEventListener("click", (e) => {
     const mode = e.target.closest("[data-mode]");
     if (mode) tmSetMode(mode.dataset.mode);

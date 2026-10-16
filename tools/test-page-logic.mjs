@@ -494,5 +494,65 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   check("重绘不会给输入框回填旧值", s.els.get("tm-perq").value, "35");
 }
 
+// ---------------------------------------------------------------- 区间模式每推进一题响一声
+{
+  chimeCalls = 0;
+  vibrateCalls = 0;
+  const v = boot({ protocol: "http:", failFetch: true });
+  v.els.get("tm-n").value = "20";
+  v.els.get("tm-minutes").value = "20";   // 每题 60 秒
+  v.context.tmStart();
+  check("开始时不响（还在第 1 题）", chimeCalls, 0);
+
+  v.clock.advance(59000);                 // 还差 1 秒到第 2 题
+  v.context.tmTick();
+  check("没到点不响", chimeCalls, 0);
+
+  v.clock.advance(2000);                  // 跨过 60 秒 → 推进到第 2 题
+  v.context.tmTick();
+  check("推进一题响两声（比「时间到」的三声轻）", chimeCalls, 2);
+  check("推进一题也振动一次", vibrateCalls, 1);
+  check("提示写明该做第几题", /该做第 2 题了/.test(v.text("toast")), true);
+
+  v.context.tmTick();                     // 同一题的 200ms 内重复 tick
+  check("同一题不会重复响", chimeCalls, 2);
+
+  v.clock.advance(60000);                 // 再推进一题
+  v.context.tmTick();
+  check("推进第 3 题再响两声", chimeCalls, 4);
+
+  // 手机锁屏/切后台回来时可能一下落下好几题：只响一声，并说明落下几题
+  chimeCalls = 0;
+  v.clock.advance(300000);                // 一下过去 5 分钟（5 题）
+  v.context.tmTick();
+  check("一次落下多题也只响一声", chimeCalls, 2);
+  check("落下多题时提示说明", /中间落下 4 题/.test(v.text("toast")), true);
+
+  // 关掉开关就不再响
+  chimeCalls = 0;
+  v.context.tmSetChime(false);
+  v.clock.advance(60000);
+  v.context.tmTick();
+  check("关掉开关后不再响", chimeCalls, 0);
+
+  // 重新打开后继续响
+  v.context.tmSetChime(true);
+  v.clock.advance(60000);
+  v.context.tmTick();
+  check("重新打开后继续响", chimeCalls, 2);
+  check("开关状态存本机", JSON.parse(v.store.get("kg.timer.v1")).chimePerQ, true);
+
+  // 分题模式不该用它：那边的提示音走「时间到」三声
+  chimeCalls = 0;
+  const w = boot({ protocol: "http:", failFetch: true });
+  w.context.tmSetMode("perq");
+  w.els.get("tm-n").value = "3";
+  w.els.get("tm-perq").value = "30";
+  w.context.tmStart();
+  w.clock.advance(30000);
+  w.context.tmTick();
+  check("分题模式到点是三声长鸣", chimeCalls, 3);
+}
+
 console.log(`\n${failures ? failures + " FAILURE(S)" : "all checks passed"}`);
 process.exit(failures ? 1 : 0);
