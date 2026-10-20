@@ -554,5 +554,131 @@ function boot({ protocol = "http:", failFetch = false, persist = new Map(), touc
   check("分题模式到点是三声长鸣", chimeCalls, 3);
 }
 
+// ---------------------------------------------------------------- 番茄钟
+{
+  chimeCalls = 0;
+  const p = boot({ protocol: "http:", failFetch: true });
+  check("默认专注 25 分钟", p.text("pomo-time"), "25:00");
+  check("默认只有「专注」被选中", [p.els.get("pomo-mode-focus").dataset.on, p.els.get("pomo-mode-short").dataset.on, p.els.get("pomo-mode-long").dataset.on], ["true", "false", "false"]);
+  check("未开始时状态是准备开始", p.text("pomo-hint"), "准备开始");
+  check("进度点按长休息间隔生成", (p.html("pomo-dots").match(/class='dot/g) || []).length, 4);
+
+  p.context.pomoStart();
+  check("开始后按钮变暂停", p.text("pomo-toggle"), "暂停");
+  check("开始后状态显示专注中", /专注中/.test(p.text("pomo-hint")), true);
+  check("番茄钟也占用底部浮条", p.els.get("timer-bar").hidden, false);
+  check("浮条显示专注", /专注/.test(p.text("tb-pos")), true);
+  check("浮条上的按钮变成跳过/重置", [p.text("tb-next"), p.text("tb-stop")], ["跳过", "重置"]);
+
+  // 25 分钟到点：响上行三音、累计一个番茄、自动进入短休息
+  chimeCalls = 0;
+  vibrateCalls = 0;
+  p.clock.advance(25 * 60000);
+  p.context.pomoTick();
+  check("专注到点响三音", chimeCalls, 3);
+  check("到点振动", vibrateCalls, 1);
+  check("自动切到短休息", p.text("pomo-time"), "05:00");
+  check("短休息按钮变选中", p.els.get("pomo-mode-short").dataset.on, "true");
+  check("今日专注计数 +1", /今日专注 1 个 · 25 分钟/.test(p.text("pomo-stats")), true);
+  check("进度点填了 1 个", (p.html("pomo-dots").match(/dot on/g) || []).length, 1);
+  check("短休息自动开始", p.text("pomo-toggle"), "暂停");
+
+  // 短休息到点 → 回到专注
+  p.clock.advance(5 * 60000);
+  p.context.pomoTick();
+  check("休息结束回到专注", p.els.get("pomo-mode-focus").dataset.on, "true");
+  check("休息结束不增加番茄数", /今日专注 1 个/.test(p.text("pomo-stats")), true);
+
+  // 暂停 / 继续（先走一段，否则「剩余＝满格」时按钮本来就该是「开始」）
+  p.clock.advance(60000);
+  p.context.pomoPause();
+  check("暂停后按钮变继续", p.text("pomo-toggle"), "继续");
+  const frozen = p.text("pomo-time");
+  p.clock.advance(120000);
+  p.context.pomoRender();
+  check("暂停期间时间不走", p.text("pomo-time"), frozen);
+  check("暂停中浮条仍在（能继续）", p.els.get("timer-bar").hidden, false);
+  p.context.pomoToggle();
+  check("继续后按钮变暂停", p.text("pomo-toggle"), "暂停");
+
+  // 跳过：不计入统计、不响铃，直接进下一段
+  chimeCalls = 0;
+  const before = p.text("pomo-stats");
+  p.context.pomoSkip();
+  check("跳过不响铃", chimeCalls, 0);
+  check("跳过不计入统计", p.text("pomo-stats"), before);
+
+  // 每 4 个番茄进长休息（第 4 个番茄结束的当下就应该切到长休息）
+  const q = boot({ protocol: "http:", failFetch: true });
+  q.els.get("pomo-focus").value = "1";
+  q.els.get("pomo-every").value = "4";
+  q.context.pomoApplySettings();
+  let longAfter4 = "";
+  for (let i = 1; i <= 4; i++) {
+    q.context.pomoStart();
+    q.clock.advance(60000);
+    q.context.pomoTick();          // 专注结束 → 短休息（第 4 次 → 长休息）
+    if (i === 4) longAfter4 = q.els.get("pomo-mode-long").dataset.on;
+    q.context.pomoSkip();          // 跳过休息，回到专注
+  }
+  check("第 4 个番茄结束时切到长休息", longAfter4, "true");
+  check("4 个番茄都计入统计", /今日专注 4 个 · 4 分钟/.test(q.text("pomo-stats")), true);
+  check("跳过休息后回到专注", q.els.get("pomo-mode-focus").dataset.on, "true");
+
+  // 重置
+  q.context.pomoSetMode("long");
+  q.context.pomoReset();
+  check("重置回该段开头", q.text("pomo-time"), "15:00");
+  check("重置后按钮变开始", q.text("pomo-toggle"), "开始");
+
+  // 关掉自动切换：到点只结算，不开下一段
+  const r = boot({ protocol: "http:", failFetch: true });
+  r.context.pomoSetAuto(false);
+  r.context.pomoStart();
+  r.clock.advance(25 * 60000);
+  r.context.pomoTick();
+  check("关掉自动切换后停在下一段开头", [r.text("pomo-time"), r.text("pomo-toggle")], ["05:00", "开始"]);
+
+  // 跨页面续跑：关掉页面时还在计时，重开应该接着走
+  const resumeStore = new Map();
+  resumeStore.set("kg.pomo.v1", JSON.stringify({
+    mode: "focus", running: true, endAt: 1750000000000 + 600000, remaining: 600000,
+    cycle: 2, settings: { focus: 25, short: 5, long: 15, longEvery: 4, sound: true, notify: false, autoNext: true },
+    stats: { date: "x", count: 0, minutes: 0 },
+  }));
+  const rs = boot({ protocol: "http:", failFetch: true, persist: resumeStore });
+  check("重开时接着跑（剩余时间按时间戳算）", rs.text("pomo-time"), "10:00");
+  check("重开时仍是运行状态", rs.text("pomo-toggle"), "暂停");
+
+  // 关页面期间已经走完：算完成、不响铃、不自动开下一段
+  chimeCalls = 0;
+  const lateStore = new Map();
+  lateStore.set("kg.pomo.v1", JSON.stringify({
+    mode: "focus", running: true, endAt: 1750000000000 - 60000, remaining: 0,
+    cycle: 0, settings: { focus: 25, short: 5, long: 15, longEvery: 4, sound: true, notify: false, autoNext: true },
+    stats: { date: "x", count: 0, minutes: 0 },
+  }));
+  const ls = boot({ protocol: "http:", failFetch: true, persist: lateStore });
+  check("过期结算不响铃", chimeCalls, 0);
+  check("过期结算算一个番茄", /今日专注 1 个 · 25 分钟/.test(ls.text("pomo-stats")), true);
+  check("过期结算后停在短休息且未开始", [ls.els.get("pomo-mode-short").dataset.on, ls.text("pomo-toggle")], ["true", "开始"]);
+
+  // 设置与进度会存本机；重开页面沿用
+  const saved = JSON.parse(r.store.get("kg.pomo.v1") || "{}");
+  check("番茄钟设置写入本机", typeof saved.settings, "object");
+  check("自动切换开关也存下来", saved.settings.autoNext, false);
+  const re = boot({ protocol: "http:", failFetch: true, persist: r.store });
+  check("重开页面沿用上次的时长设置", re.els.get("pomo-focus").value, 25);
+  check("重开页面沿用自动切换开关", re.els.get("pomo-auto").checked, false);
+  check("重开页面自动落到短休息（上次结束时的那一段）", re.els.get("pomo-mode-short").dataset.on, "true");
+
+  // 两个计时不能同时跑（否则两套提示音）
+  const z = boot({ protocol: "http:", failFetch: true });
+  z.context.tmStart();
+  z.context.pomoStart();
+  check("做题计时在跑时番茄钟不启动", /做题计时正在进行/.test(z.text("toast")), true);
+  check("番茄钟保持未开始", z.text("pomo-hint"), "准备开始");
+}
+
 console.log(`\n${failures ? failures + " FAILURE(S)" : "all checks passed"}`);
 process.exit(failures ? 1 : 0);

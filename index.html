@@ -125,6 +125,14 @@
   }
   #timer-bar[hidden]{display:none}
   body.timer-open .wrap{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+  /* 番茄钟：模式按钮与进度点，样式与做题计时的模式按钮一致 */
+  #pomo-mode-focus,#pomo-mode-short,#pomo-mode-long{opacity:.55}
+  #pomo-mode-focus[data-on="true"],#pomo-mode-short[data-on="true"],#pomo-mode-long[data-on="true"]{
+    opacity:1;background:var(--accent);color:var(--accent-fg);border-color:transparent;
+  }
+  #pomo-dots{display:flex;gap:8px;justify-content:center}
+  #pomo-dots .dot{display:block;width:10px;height:10px;border-radius:50%;border:1px solid var(--line)}
+  #pomo-dots .dot.on{background:var(--accent);border-color:transparent}
   #toast{
     position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
     background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;
@@ -157,6 +165,7 @@
     <button role="tab" data-tab="stats">频率统计</button>
     <button role="tab" data-tab="drill">刷词模式</button>
     <button role="tab" data-tab="timer">做题计时</button>
+    <button role="tab" data-tab="pomo">番茄钟</button>
     <button role="tab" data-tab="data">数据</button>
   </nav>
 
@@ -269,6 +278,55 @@
       </div>
     </section>
 
+    <!-- 番茄钟 -->
+    <section id="tab-pomo" hidden>
+      <div class="card" style="text-align:center">
+        <div class="row" style="justify-content:center;gap:6px">
+          <button id="pomo-mode-focus" data-pomo="focus" data-on="true">专注</button>
+          <button id="pomo-mode-short" data-pomo="short" data-on="false">短休息</button>
+          <button id="pomo-mode-long" data-pomo="long" data-on="false">长休息</button>
+        </div>
+        <div class="tm-big" id="pomo-time" style="margin-top:14px">25:00</div>
+        <div class="counter" id="pomo-hint" style="margin-top:4px">准备开始</div>
+        <div class="barwrap" style="margin:14px 0"><span class="bar" id="pomo-bar" style="width:0%"></span></div>
+        <div class="row" style="justify-content:center;gap:10px">
+          <button id="pomo-toggle" class="primary">开始</button>
+          <button id="pomo-reset" class="ghost">重置</button>
+          <button id="pomo-skip" class="ghost">跳过</button>
+        </div>
+        <div id="pomo-dots" style="margin-top:14px"></div>
+        <div class="counter" id="pomo-stats" style="margin-top:8px">今日专注 0 个 · 0 分钟</div>
+      </div>
+
+      <div class="card">
+        <strong>番茄钟设置</strong>
+        <div class="row" style="margin-top:10px;gap:14px">
+          <label class="field">专注（分钟）
+            <input type="number" id="pomo-focus" min="1" max="180" step="1" inputmode="numeric" value="25">
+          </label>
+          <label class="field">短休息（分钟）
+            <input type="number" id="pomo-short" min="1" max="60" step="1" inputmode="numeric" value="5">
+          </label>
+          <label class="field">长休息（分钟）
+            <input type="number" id="pomo-long" min="1" max="120" step="1" inputmode="numeric" value="15">
+          </label>
+          <label class="field">每几个番茄长休息
+            <input type="number" id="pomo-every" min="2" max="12" step="1" inputmode="numeric" value="4">
+          </label>
+        </div>
+        <label class="row" style="margin-top:12px;font-size:13px;color:var(--muted)">
+          <input type="checkbox" id="pomo-auto" checked style="width:auto"> 一段结束自动进入下一段
+        </label>
+        <label class="row" style="margin-top:6px;font-size:13px;color:var(--muted)">
+          <input type="checkbox" id="pomo-sound" checked style="width:auto"> 提示音（专注结束上行三音，休息结束下行三音）
+        </label>
+        <label class="row" style="margin-top:6px;font-size:13px;color:var(--muted)">
+          <input type="checkbox" id="pomo-notify" style="width:auto"> 系统通知（屏幕关着也能提醒，需要授权）
+        </label>
+        <p class="hint">快捷键（在这一页时）：<kbd>空格</kbd> 开始/暂停 · <kbd>R</kbd> 重置 · <kbd>S</kbd> 跳过。关掉页面再打开会接着上次的时间继续。</p>
+      </div>
+    </section>
+
     <!-- 数据 -->
     <section id="tab-data" hidden>
       <div class="card">
@@ -329,6 +387,7 @@ const K_DB = "kg.db.v1";        // cached library {version, updated, words[]}
 const K_STATS = "kg.stats.v1";  // per word: {q, known, unknown, collected, dup, last}
 const K_NOTES = "kg.notes.v1";  // per word: manual supplement {tone, pos, modifies, subject, note}
 const K_TIMER = "kg.timer.v1";  // 做题计时的设置与最近几轮结果
+const K_POMO = "kg.pomo.v1";    // 番茄钟的设置、当前进度与今日统计
 const K_LEGACY_LOCAL = "kg.local.v1"; // retired: words used to be addable by hand, local-only
 
 const $ = (id) => document.getElementById(id);
@@ -353,6 +412,17 @@ const state = {
     timeouts: 0,
     result: "",
     history: [],         // 最近几轮 {at, mode, done, n, ms, timeouts}
+  },
+  // 番茄钟：专注 / 短休息 / 长休息三段轮转，每 N 个番茄进长休息
+  pomo: {
+    mode: "focus",                       // focus / short / long
+    running: false,
+    remaining: 25 * 60000,
+    endAt: 0,
+    cycle: 0,                            // 今天完成了几个番茄
+    catchUp: false,                      // 上次关页面期间已经走完
+    settings: { focus: 25, short: 5, long: 15, longEvery: 4, sound: true, notify: false, autoNext: true },
+    stats: { date: "", count: 0, minutes: 0 },
   },
 };
 
@@ -1082,18 +1152,15 @@ function renderTimer() {
   $("tm-next").disabled = !(t.phase === "waiting" || (!rangeMode && t.phase === "running"));
   $("tm-stop").disabled = !running;
 
-  renderTimerBar();
+  syncBar();
 }
 
 function renderTimerBar() {
   const t = state.tm;
-  const bar = $("timer-bar");
-  if (!bar) return;
-  const show = tmRunning();
-  bar.hidden = !show;
-  document.body.classList.toggle("timer-open", show);
   $("tb-next").hidden = t.mode === "range";
-  if (!show) return;
+  $("tb-next").textContent = "下一题 →";
+  $("tb-stop").hidden = false;
+  $("tb-stop").textContent = "结束";
   const rangeMode = t.mode === "range";
   $("tb-pos").textContent = rangeMode
     ? "应在第 " + tmShouldBeAt() + "/" + t.n + " 题"
@@ -1107,6 +1174,337 @@ function renderTimerBar() {
     $("tb-bar").style.width = (t.phase === "waiting" ? 100 : Math.min(100, ((Date.now() - t.qStart) / ms(t.perq)) * 100)).toFixed(1) + "%";
   }
   $("tb-pause").textContent = t.phase === "paused" ? "继续" : "暂停";
+}
+
+// ---------------------------------------------------------------- 番茄钟
+
+// 移植自独立的番茄钟页面：专注 / 短休息 / 长休息三段轮转，每 N 个番茄进一次长休息，
+// 一段结束自动切下一段，今日专注数按天重置。关掉页面再打开会按时间戳接着跑。
+const POMO_LABEL = { focus: "专注", short: "短休息", long: "长休息" };
+const pomoTotalMs = (mode) => Math.max(60000, state.pomo.settings[mode] * 60000);
+// 正在跑，或者中途暂停了（暂停也要能从浮条上继续）
+const pomoActive = () => {
+  const p = state.pomo;
+  if (p.running) return true;
+  return p.remaining > 0 && p.remaining < pomoTotalMs(p.mode) - 500;
+};
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+}
+
+function pomoSave() {
+  const p = state.pomo;
+  try {
+    localStorage.setItem(K_POMO, JSON.stringify({
+      mode: p.mode, running: p.running, endAt: p.endAt, remaining: p.remaining,
+      cycle: p.cycle, settings: p.settings, stats: p.stats,
+    }));
+  } catch {}
+}
+
+function pomoLoad() {
+  const p = state.pomo;
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(K_POMO) || "null"); } catch { saved = null; }
+  if (saved && typeof saved === "object") {
+    const g = saved.settings || {};
+    const clampInt = (v, lo, hi, fallback) =>
+      (typeof v === "number" && Number.isFinite(v) ? Math.min(hi, Math.max(lo, Math.round(v))) : fallback);
+    p.settings.focus = clampInt(g.focus, 1, 180, 25);
+    p.settings.short = clampInt(g.short, 1, 60, 5);
+    p.settings.long = clampInt(g.long, 1, 120, 15);
+    p.settings.longEvery = clampInt(g.longEvery, 2, 12, 4);
+    if (typeof g.sound === "boolean") p.settings.sound = g.sound;
+    if (typeof g.notify === "boolean") p.settings.notify = g.notify;
+    if (typeof g.autoNext === "boolean") p.settings.autoNext = g.autoNext;
+    if (POMO_LABEL[saved.mode]) p.mode = saved.mode;
+    if (typeof saved.cycle === "number" && saved.cycle >= 0) p.cycle = Math.floor(saved.cycle);
+    if (saved.stats && saved.stats.date === todayKey()) {
+      p.stats = { date: saved.stats.date, count: Number(saved.stats.count) || 0, minutes: Number(saved.stats.minutes) || 0 };
+    }
+    p.remaining = pomoTotalMs(p.mode);
+    if (saved.running && typeof saved.endAt === "number") {
+      const left = saved.endAt - Date.now();
+      if (left > 1000) {                 // 还在倒计时：接着跑
+        p.running = true;
+        p.endAt = saved.endAt;
+        p.remaining = left;
+      } else {                           // 关页面期间已经走完：静默结算，不在加载时响铃
+        p.catchUp = true;
+        p.remaining = 0;
+      }
+    } else if (typeof saved.remaining === "number") {
+      p.remaining = Math.min(pomoTotalMs(p.mode), Math.max(0, saved.remaining));
+    }
+  }
+  if (!p.stats.date) p.stats = { date: todayKey(), count: 0, minutes: 0 };
+}
+
+let pomoTicker = null;
+function pomoStartTicker() {
+  if (pomoTicker) return;
+  pomoTicker = setInterval(() => { pomoTick(); }, 250);
+}
+function pomoStopTicker() {
+  if (pomoTicker) { clearInterval(pomoTicker); pomoTicker = null; }
+}
+
+function pomoTick() {
+  const p = state.pomo;
+  if (!p.running) return;
+  const left = p.endAt - Date.now();
+  if (left <= 0) {
+    p.remaining = 0;
+    pomoRender();
+    pomoFinish(false);
+    return;
+  }
+  p.remaining = left;
+  pomoRender();
+}
+
+function pomoChime(kind) {
+  if (!state.pomo.settings.sound) return;
+  // 专注结束上行、休息结束下行——不用看屏幕也能从音程听出是哪一段结束
+  tmPlay(kind === "focus" ? [523.25, 659.25, 783.99] : [783.99, 659.25, 523.25], 0.15, [120, 80, 120]);
+}
+
+function pomoNotify(title, body) {
+  const p = state.pomo;
+  if (!p.settings.notify) return;
+  try {
+    if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+    new Notification(title, { body: body, silent: true });
+  } catch {}
+}
+
+function pomoBumpStats() {
+  const p = state.pomo;
+  const d = todayKey();
+  if (p.stats.date !== d) p.stats = { date: d, count: 0, minutes: 0 };
+  p.stats.count += 1;
+  p.stats.minutes += p.settings.focus;
+}
+
+function pomoStart() {
+  const p = state.pomo;
+  if (p.running) return;
+  if (tmRunning()) { toast("做题计时正在进行，先结束它再开番茄钟"); return; }
+  if (p.remaining <= 0) p.remaining = pomoTotalMs(p.mode);
+  p.endAt = Date.now() + p.remaining;
+  p.running = true;
+  pomoSave();
+  pomoRender();
+  pomoStartTicker();
+}
+
+function pomoPause() {
+  const p = state.pomo;
+  if (!p.running) return;
+  p.remaining = Math.max(0, p.endAt - Date.now());
+  p.running = false;
+  pomoStopTicker();
+  pomoSave();
+  pomoRender();
+}
+
+function pomoToggle() {
+  if (state.pomo.running) pomoPause(); else pomoStart();
+}
+
+function pomoReset() {
+  const p = state.pomo;
+  p.running = false;
+  pomoStopTicker();
+  p.remaining = pomoTotalMs(p.mode);
+  pomoSave();
+  pomoRender();
+}
+
+function pomoSwitchTo(mode, autoStart) {
+  const p = state.pomo;
+  p.mode = POMO_LABEL[mode] ? mode : "focus";
+  p.remaining = pomoTotalMs(p.mode);
+  p.running = false;
+  pomoStopTicker();
+  if (autoStart) { pomoStart(); return; }
+  pomoSave();
+  pomoRender();
+}
+
+// skipped=true：手动跳过，不计入统计也不响铃
+function pomoFinish(skipped) {
+  const p = state.pomo;
+  const wasFocus = p.mode === "focus";
+  p.running = false;
+  pomoStopTicker();
+  if (!skipped) {
+    if (wasFocus) {
+      p.cycle += 1;
+      pomoBumpStats();
+      pomoChime("focus");
+      pomoNotify("专注完成", p.cycle % p.settings.longEvery === 0 ? "来一段长休息。" : "休息一下，喝口水。");
+    } else {
+      pomoChime("break");
+      pomoNotify("休息结束", "回到专注状态。");
+    }
+  }
+  const next = wasFocus
+    ? ((!skipped && p.cycle > 0 && p.cycle % p.settings.longEvery === 0) ? "long" : "short")
+    : "focus";
+  pomoSwitchTo(next, !skipped && p.settings.autoNext);
+}
+
+function pomoSkip() {
+  if (!pomoActive()) return;
+  pomoFinish(true);
+}
+
+// 关页面期间这一段已经走完：算完成（时间真的过去了），但不响铃、不自动开下一段
+function pomoSettle() {
+  const p = state.pomo;
+  const wasFocus = p.mode === "focus";
+  p.running = false;
+  pomoStopTicker();
+  if (wasFocus) {
+    p.cycle += 1;
+    pomoBumpStats();
+  }
+  const next = wasFocus
+    ? ((p.cycle > 0 && p.cycle % p.settings.longEvery === 0) ? "long" : "short")
+    : "focus";
+  pomoSwitchTo(next, false);
+}
+
+function pomoSetMode(mode) {
+  if (state.pomo.mode === mode) return;
+  pomoSwitchTo(mode, false);
+}
+
+function pomoSetAuto(on) {
+  state.pomo.settings.autoNext = !!on;
+  pomoSave();
+  pomoPaintSettings();
+}
+
+function pomoSetSound(on) {
+  state.pomo.settings.sound = !!on;
+  pomoSave();
+  pomoPaintSettings();
+}
+
+function pomoApplySettings() {
+  const p = state.pomo;
+  const read = (id, lo, hi, fallback) => {
+    const v = parseInt($(id).value, 10);
+    return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fallback;
+  };
+  const prev = pomoTotalMs(p.mode);
+  p.settings.focus = read("pomo-focus", 1, 180, p.settings.focus);
+  p.settings.short = read("pomo-short", 1, 60, p.settings.short);
+  p.settings.long = read("pomo-long", 1, 120, p.settings.long);
+  p.settings.longEvery = read("pomo-every", 2, 12, p.settings.longEvery);
+  // 没在跑的时候，如果本来停在这一段的开头，就跟着新时长走；否则只往下压不超过总长
+  if (!p.running) {
+    const atStart = Math.abs(p.remaining - prev) < 1200;
+    p.remaining = atStart ? pomoTotalMs(p.mode) : Math.min(p.remaining, pomoTotalMs(p.mode));
+  }
+  pomoSave();
+  pomoPaintSettings();
+  pomoRender();
+}
+
+function pomoPaintSettings() {
+  const p = state.pomo;
+  $("pomo-focus").value = p.settings.focus;
+  $("pomo-short").value = p.settings.short;
+  $("pomo-long").value = p.settings.long;
+  $("pomo-every").value = p.settings.longEvery;
+  $("pomo-auto").checked = !!p.settings.autoNext;
+  $("pomo-sound").checked = !!p.settings.sound;
+  $("pomo-notify").checked = !!p.settings.notify;
+}
+
+function pomoSetNotify(want) {
+  const p = state.pomo;
+  if (!want) { p.settings.notify = false; pomoSave(); pomoPaintSettings(); return; }
+  try {
+    if (typeof Notification === "undefined" || !Notification.requestPermission) {
+      p.settings.notify = false;
+      pomoPaintSettings();
+      toast("这个浏览器不支持系统通知");
+      return;
+    }
+    Promise.resolve(Notification.requestPermission()).then((perm) => {
+      p.settings.notify = perm === "granted";
+      pomoSave();
+      pomoPaintSettings();
+      if (!p.settings.notify) toast("没有拿到通知权限，先用提示音");
+    }).catch(() => { p.settings.notify = false; pomoPaintSettings(); });
+  } catch {
+    p.settings.notify = false;
+    pomoPaintSettings();
+  }
+}
+
+function pomoRender() {
+  const p = state.pomo;
+  const total = pomoTotalMs(p.mode);
+  $("pomo-time").textContent = mmss(Math.max(0, Math.ceil(p.remaining / 1000)));
+  const frac = Math.max(0, Math.min(1, p.remaining / total));
+  $("pomo-bar").style.width = ((1 - frac) * 100).toFixed(1) + "%";
+
+  $("pomo-mode-focus").dataset.on = String(p.mode === "focus");
+  $("pomo-mode-short").dataset.on = String(p.mode === "short");
+  $("pomo-mode-long").dataset.on = String(p.mode === "long");
+
+  let hint;
+  if (p.running) hint = POMO_LABEL[p.mode] + "中 · 第 " + (Math.floor(p.cycle / p.settings.longEvery) + 1) + " 轮";
+  else if (p.remaining <= 0) hint = "已完成";
+  else if (p.remaining < total - 500) hint = "已暂停";
+  else hint = "准备开始";
+  $("pomo-hint").textContent = hint;
+
+  const started = p.remaining < total - 500 && p.remaining > 0;
+  $("pomo-toggle").textContent = p.running ? "暂停" : (started ? "继续" : "开始");
+  $("pomo-skip").disabled = !pomoActive();
+
+  const every = p.settings.longEvery;
+  const filled = p.mode === "long" ? every : p.cycle % every;
+  let dots = "";
+  for (let i = 0; i < every; i++) dots += "<span class='dot" + (i < filled ? " on" : "") + "'></span>";
+  $("pomo-dots").innerHTML = dots;
+
+  const st = p.stats.date === todayKey() ? p.stats : { count: 0, minutes: 0 };
+  $("pomo-stats").textContent = "今日专注 " + st.count + " 个 · " + st.minutes + " 分钟";
+  syncBar();
+}
+
+// 浮条服务于「当前在跑的那个计时」：做题计时优先，其次番茄钟。
+// 两者同时跑没有意义（会有两套提示音），start 时会互相拦一下。
+function syncBar() {
+  const bar = $("timer-bar");
+  if (!bar) return;
+  const tmOn = tmRunning();
+  const pomoOn = pomoActive();
+  bar.hidden = !(tmOn || pomoOn);
+  document.body.classList.toggle("timer-open", tmOn || pomoOn);
+  if (bar.hidden) return;
+  if (pomoOn && !tmOn) renderPomoBar(); else renderTimerBar();
+}
+
+function renderPomoBar() {
+  const p = state.pomo;
+  $("tb-pos").textContent = POMO_LABEL[p.mode] + (p.running ? " 中" : " · 已暂停");
+  $("tb-clock").textContent = mmss(Math.max(0, Math.ceil(p.remaining / 1000)));
+  $("tb-bar").style.width = ((1 - Math.max(0, Math.min(1, p.remaining / pomoTotalMs(p.mode)))) * 100).toFixed(1) + "%";
+  $("tb-pause").textContent = p.running ? "暂停" : "继续";
+  $("tb-next").hidden = false;
+  $("tb-next").textContent = "跳过";
+  $("tb-stop").hidden = false;
+  $("tb-stop").textContent = "重置";
 }
 
 // ---------------------------------------------------------------- plumbing
@@ -1278,14 +1676,35 @@ function wire() {
       if (first) openWord(first.w);
     }
   });
-  // 计时：页内的按钮 + 浮条上的按钮
+  // 计时：页内的按钮 + 浮条上的按钮（浮条跟着「当前在跑的那个计时」走）
   $("tm-start").addEventListener("click", tmStart);
   $("tm-pause").addEventListener("click", tmPauseToggle);
   $("tm-next").addEventListener("click", tmNextQuestion);
   $("tm-stop").addEventListener("click", tmStop);
-  $("tb-pause").addEventListener("click", tmPauseToggle);
-  $("tb-next").addEventListener("click", tmNextQuestion);
-  $("tb-stop").addEventListener("click", tmStop);
+  $("tb-pause").addEventListener("click", () => {
+    if (pomoActive() && !tmRunning()) pomoToggle(); else tmPauseToggle();
+  });
+  $("tb-next").addEventListener("click", () => {
+    if (pomoActive() && !tmRunning()) pomoSkip(); else tmNextQuestion();
+  });
+  $("tb-stop").addEventListener("click", () => {
+    if (pomoActive() && !tmRunning()) pomoReset(); else tmStop();
+  });
+  // 番茄钟
+  $("pomo-toggle").addEventListener("click", pomoToggle);
+  $("pomo-reset").addEventListener("click", pomoReset);
+  $("pomo-skip").addEventListener("click", pomoSkip);
+  $("tab-pomo").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-pomo]");
+    if (btn) pomoSetMode(btn.dataset.pomo);
+  });
+  for (const id of ["pomo-focus", "pomo-short", "pomo-long", "pomo-every"]) {
+    $(id).addEventListener("change", pomoApplySettings);
+    $(id).addEventListener("blur", pomoApplySettings);
+  }
+  $("pomo-auto").addEventListener("change", () => pomoSetAuto($("pomo-auto").checked));
+  $("pomo-sound").addEventListener("change", () => pomoSetSound($("pomo-sound").checked));
+  $("pomo-notify").addEventListener("change", () => pomoSetNotify($("pomo-notify").checked));
   for (const [id, key] of [["tm-n", "n"], ["tm-minutes", "minutes"], ["tm-perq", "perq"]]) {
     // input：边打字边联动；blur：把没填完/填错的数字归一化
     $(id).addEventListener("input", () => { if (!tmRunning()) tmSyncFromInputs(key); });
@@ -1372,22 +1791,38 @@ function wire() {
   document.addEventListener("keydown", (e) => {
     if (e.target.matches("input,textarea")) return;
     const onDrill = !$("tab-drill").hidden;
+    const onPomo = !$("tab-pomo").hidden;
+    const key = (e.key || "").toLowerCase();
+    const typing = e.metaKey || e.ctrlKey || e.altKey;
     if (e.key === "/") { e.preventDefault(); switchTab("search"); }
     else if (onDrill && e.key === "ArrowLeft") drillMove(-1);
     else if (onDrill && e.key === "ArrowRight") drillMove(1);
     else if (onDrill && (e.key === " " || e.key === "Enter")) { e.preventDefault(); state.drill.flipped = !state.drill.flipped; renderDrill(); }
     else if (onDrill && e.key === "1") drillMark("unknown");
     else if (onDrill && e.key === "2") drillMark("known");
+    else if (onPomo && !typing && e.code === "Space") { e.preventDefault(); pomoToggle(); }
+    else if (onPomo && !typing && key === "r") pomoReset();
+    else if (onPomo && !typing && key === "s") pomoSkip();
   });
 }
 
 loadStore();
+pomoLoad();
 wire();
 wireInstallEvents();
 renderMeta(false);
 renderAll();
 tmPaintSettings();
 renderTimer();
+pomoPaintSettings();
+pomoRender();
+// 关页面期间番茄钟走完了：静默结算（算完成，但不响铃、不自动开下一段）
+if (state.pomo.catchUp) {
+  state.pomo.catchUp = false;
+  pomoSettle();
+} else if (state.pomo.running) {
+  pomoStartTicker();
+}
 syncFullscreenButton();
 syncInstallButton();
 registerServiceWorker();
